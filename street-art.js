@@ -1,7 +1,7 @@
 /* Coordinates are in world pixels. Walkways follow the painted cobblestones. */
 window.HoublonStreet = (() => {
   let image = new Image();
-  image.src = 'assets/rue-douce.png';
+  image.src = 'assets/rue-douce-texturee.png';
   const width = 720, height = 738;
   const dayDoors = [
     {x:184, y:213, type:'library', label:'BIBLIOTHÈQUE'},
@@ -33,8 +33,9 @@ window.HoublonStreet = (() => {
      {x:199,y:582,type:'bar',index:6},{x:527,y:582,type:'bar',index:7},
      {x:356,y:670,type:'travel',label:'QUARTIER DES BRASSEURS'}],
     paths:[[325,15,378,300],[325,365,378,720],[36,228,687,258],
-     [22,248,43,586],[676,248,695,586],[40,573,683,599],
-     [148,254,670,390],[45,366,170,382],[108,615,610,714]]}
+     // Overlap junctions so movement never hits an invisible gap.
+     [22,248,52,600],[670,248,695,600],[40,573,683,615],
+     [148,254,670,390],[22,366,190,390],[108,610,610,714]]}
   ];
   let current=0,doors=dayDoors;
   function select(id){current=id===1?1:0;image=maps[current].image;doors=maps[current].doors;}
@@ -51,6 +52,8 @@ window.HoublonStreet = (() => {
     }
     ctx.save();ctx.scale(window.HoublonView.streetZoom,window.HoublonView.streetZoom);ctx.translate(-cameraX,-cameraY);
     ctx.imageSmoothingEnabled=true;ctx.drawImage(image,0,0,width,height);
+    if(current===1)window.HoublonAtmosphere.nightLights(ctx);
+    else window.HoublonAtmosphere.dayWind(ctx);
     maps[current].chimneys.forEach(([x,y],i)=>window.HoublonAtmosphere.chimney(ctx,x,y,i*1.7));
     for(const door of doors) {
       const completed=door.type==='bar'&&state.completed.includes(door.index);

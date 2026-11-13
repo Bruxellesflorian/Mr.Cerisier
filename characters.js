@@ -6,24 +6,40 @@ window.HoublonCharacters = (() => {
   shirt:['#a86043','#527e91','#886593','#56754e','#b39355','#455263']
  };
  const names={skin:['Pêche','Doré','Ambré','Ébène','Miel','Acajou'],hair:['Châtain','Cuivré','Blond','Noir','Auburn','Argent'],shirt:['Terracotta','Bleu pétrole','Prune','Sauge','Ocre','Ardoise']};
- const atlas=new Image(),frames=new Map(),cache=new Map();let ready=false,failed=false;
+ const atlas=new Image(),frames=new Map(),cache=new Map(),cells=new Map();let ready=false,failed=false;
  const rgb=hex=>[1,3,5].map(i=>parseInt(hex.slice(i,i+2),16));
  atlas.onload=()=>{ready=true;window.dispatchEvent(new Event('characters-ready'));};
  atlas.onerror=()=>{failed=true;};atlas.src=window.HOUBLON_SPRITES_DATA;
- function base(gender,row,frame){
-  const key=[gender,row,frame].join(':');if(frames.has(key))return frames.get(key);
+ function cell(gender,row,frame){
+  const key=[gender,row,frame].join(':');if(cells.has(key))return cells.get(key);
   const w=atlas.naturalWidth/8,h=atlas.naturalHeight/4,col=(gender==='girl'?4:0)+frame;
   const sx=Math.round(col*w),sy=Math.round(row*h),sw=Math.round((col+1)*w)-sx,sh=Math.round((row+1)*h)-sy;
   const source=document.createElement('canvas');source.width=sw;source.height=sh;
   const sc=source.getContext('2d',{willReadFrequently:true});sc.drawImage(atlas,sx,sy,sw,sh,0,0,sw,sh);
   const pixels=sc.getImageData(0,0,source.width,source.height).data;
   let l=source.width,r=0,t=source.height,b=0;
-  for(let y=0;y<source.height;y++)for(let x=0;x<source.width;x++)if(pixels[(y*source.width+x)*4+3]>140){l=Math.min(l,x);r=Math.max(r,x);t=Math.min(t,y);b=Math.max(b,y);}
+  for(let y=0;y<source.height;y++){
+   let count=0,left=source.width,right=0;
+   for(let x=0;x<source.width;x++)if(pixels[(y*source.width+x)*4+3]>140){count++;left=Math.min(left,x);right=Math.max(right,x);}
+   // Ignore isolated atlas-edge specks that otherwise change a pose's size.
+   if(count>=6){l=Math.min(l,left);r=Math.max(r,right);t=Math.min(t,y);b=Math.max(b,y);}
+  }
+  // Align using the head, not swinging arms or the extended boot.
+  let headLeft=source.width,headRight=0;
+  for(let y=t;y<=t+(b-t)*.3;y++)for(let x=l;x<=r;x++)if(pixels[(y*source.width+x)*4+3]>140){headLeft=Math.min(headLeft,x);headRight=Math.max(headRight,x);}
+  const result={source,l,r,t,b,head:(headLeft+headRight)/2,h};cells.set(key,result);return result;
+ }
+ function base(gender,row,frame){
+  const key=[gender,row,frame].join(':');if(frames.has(key))return frames.get(key);
+  const {source,l,r,t,b,head,h}=cell(gender,row,frame),idle=cell(gender,row,1);
   // Keep the source cell resolution instead of shrinking every pose to 64 × 96.
   const out=document.createElement('canvas');out.height=Math.ceil(h);out.width=Math.ceil(out.height*2/3);
   const c=out.getContext('2d',{willReadFrequently:true});c.imageSmoothingEnabled=true;c.imageSmoothingQuality='high';
-  const height=out.height*92/96,width=(r-l+1)/(b-t+1)*height;
-  c.drawImage(source,l,t,r-l+1,b-t+1,(out.width-width)/2,out.height*2/96,width,height);
+  // One scale for the whole directional cycle prevents the body from pulsing.
+  const scale=out.height*92/96/(idle.b-idle.t+1);
+  const idleCentre=(idle.l+idle.r)/2;
+  const left=out.width/2+(l-head+idle.head-idleCentre)*scale;
+  c.drawImage(source,l,t,r-l+1,b-t+1,left,out.height*2/96,(r-l+1)*scale,(b-t+1)*scale);
   const data=c.getImageData(0,0,out.width,out.height);frames.set(key,data);return data;
  }
  function tinted(p,row,frame){
@@ -50,7 +66,9 @@ window.HoublonCharacters = (() => {
   c.save();c.imageSmoothingEnabled=true;c.imageSmoothingQuality='high';
   c.fillStyle='#293f3830';c.beginPath();c.ellipse(Math.round(x),Math.round(y),height*.17,height*.045,0,0,Math.PI*2);c.fill();
   if(ready){const row={down:0,left:1,right:2,up:3}[dir]||0,frame=walk?Math.floor(walk/8)%4:1;
-   const image=tinted(p,row,frame);c.drawImage(image,Math.round(x-height/3),Math.round(y-height),height*2/3,height);
+   const image=tinted(p,row,frame);
+   // Subpixel placement follows the camera smoothly, without blurring between poses.
+   c.drawImage(image,x-height/3,y-height,height*2/3,height);
   }else{c.fillStyle='#d8b584';c.textAlign='center';c.font='9px sans-serif';c.fillText(failed?'!':'…',x,y-12);}
   c.restore();
  }

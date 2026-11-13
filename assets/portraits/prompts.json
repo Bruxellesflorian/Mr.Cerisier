@@ -1,0 +1,39 @@
+{
+  "tool": "image_gen built-in",
+  "reference": "reference.png",
+  "base": "Generate a NEW character sprite sheet. Use reference ONLY for crisp warm PIXEL ART technique and ornate GOLD FRAMES, never its character's face, haircut, anatomy or clothes. The new person's individuality described below is essential. Exactly SIX equally sized square bust portraits of ONE identical character, strict 3 columns x 2 rows, image 1536x1024, each complete frame contained within its own 512px cell with small uniform margin. Same face, age, proportions, outfit, hair throughout all six. Poses reading order: welcoming smile; explaining with open hand; presenting a beer glass thoughtfully; delighted laughing smile; pondering with chin on hand; celebrating with raised beer mug. Opaque warm brown sheet background. No text or labels. Do not beautify into a generic young model. Character and backdrop: ",
+  "people": [
+    [
+      "gaston",
+      "Gaston, 62-year-old stocky rotund Belgian male pub owner, very round rosy face, large bulbous nose, thick silver handlebar moustache, bald crown with short silver side hair, heavy eyebrows, kind small eyes, green checked shirt with brown suspenders and sage apron, no waistcoat, broad belly and shoulders visible. Cozy oak pub with malt sacks."
+    ],
+    [
+      "lou",
+      "Lou, 38-year-old athletic muscular female brewer, medium brown skin, broad square jaw, strong straight eyebrows, short cropped dark brown hair with shaved sides, no bun, no jewellery, rolled-up terracotta work shirt and leather brewing apron, sturdy shoulders, direct confident smile. Copper brewing vats behind her."
+    ],
+    [
+      "iris",
+      "Iris, 73-year-old slender female botanist, pale skin with age lines, long angular nose, fine lips, small round wire glasses, wispy white hair in a long single braid, sage cardigan over ivory blouse, narrow shoulders and slightly stooped posture, gentle curious gaze. Hop vines and herb jars behind her."
+    ],
+    [
+      "alma",
+      "Alma, 55-year-old tall broad full-figured Black woman with deep dark brown skin, wide cheekbones, broad nose, grey thick braids wrapped in a high crown, plum tailored jacket with gold brooch, strong stately posture, expressive warm smile, no glasses. Elegant burgundy tasting salon behind her."
+    ],
+    [
+      "nora",
+      "Nora, 26-year-old very petite woman with pale heavily freckled skin, small upturned nose, round cheeks, short unruly curly red bob, bright green eyes, mustard headband and purple gardener overalls over a cream tee, playful lively expression, no tied bun. Moonlit indoor hop garden behind her."
+    ],
+    [
+      "emile",
+      "Emile, 45-year-old very tall lanky male brewer, pale olive skin, narrow long face, prominent hooked nose, receding short black hair, long thin eyebrows, clean shaven, ochre turtleneck and navy work apron, narrow shoulders, slightly reserved intellectual manner. Blue-lit fermentation tanks behind him."
+    ],
+    [
+      "sam",
+      "Sam, 66-year-old broad-shouldered Black man, deep dark skin, completely bald head, neatly trimmed square silver full beard, wide flat nose, rectangular glasses, petrol blue collared shirt with dark leather vest, calm reassuring presence. Wooden cellar shelves and barrels behind him."
+    ],
+    [
+      "mila",
+      "Mila, 34-year-old East Asian female sommelier, warm light skin, sleek straight jet-black chin-length bob with blunt bangs, narrow almond eyes, oval face, slim straight nose, slim graceful build, slate blue high-collared jacket with cream scarf, poised measured smile. Violet observatory windows and elegant glasses behind her."
+    ]
+  ]
+}
