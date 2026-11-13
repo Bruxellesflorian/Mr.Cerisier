@@ -13,24 +13,26 @@ window.HoublonCharacters = (() => {
  function base(gender,row,frame){
   const key=[gender,row,frame].join(':');if(frames.has(key))return frames.get(key);
   const w=atlas.naturalWidth/8,h=atlas.naturalHeight/4,col=(gender==='girl'?4:0)+frame;
-  const source=document.createElement('canvas');source.width=Math.ceil(w);source.height=Math.ceil(h);
-  const sc=source.getContext('2d',{willReadFrequently:true});sc.drawImage(atlas,col*w,row*h,w,h,0,0,source.width,source.height);
+  const sx=Math.round(col*w),sy=Math.round(row*h),sw=Math.round((col+1)*w)-sx,sh=Math.round((row+1)*h)-sy;
+  const source=document.createElement('canvas');source.width=sw;source.height=sh;
+  const sc=source.getContext('2d',{willReadFrequently:true});sc.drawImage(atlas,sx,sy,sw,sh,0,0,sw,sh);
   const pixels=sc.getImageData(0,0,source.width,source.height).data;
   let l=source.width,r=0,t=source.height,b=0;
   for(let y=0;y<source.height;y++)for(let x=0;x<source.width;x++)if(pixels[(y*source.width+x)*4+3]>140){l=Math.min(l,x);r=Math.max(r,x);t=Math.min(t,y);b=Math.max(b,y);}
-  const out=document.createElement('canvas');out.width=64;out.height=96;
-  const c=out.getContext('2d',{willReadFrequently:true});c.imageSmoothingEnabled=true;
-  const height=92,width=(r-l+1)/(b-t+1)*height;
-  c.drawImage(source,l,t,r-l+1,b-t+1,(64-width)/2,2,width,height);
-  const data=c.getImageData(0,0,64,96);frames.set(key,data);return data;
+  // Keep the source cell resolution instead of shrinking every pose to 64 × 96.
+  const out=document.createElement('canvas');out.height=Math.ceil(h);out.width=Math.ceil(out.height*2/3);
+  const c=out.getContext('2d',{willReadFrequently:true});c.imageSmoothingEnabled=true;c.imageSmoothingQuality='high';
+  const height=out.height*92/96,width=(r-l+1)/(b-t+1)*height;
+  c.drawImage(source,l,t,r-l+1,b-t+1,(out.width-width)/2,out.height*2/96,width,height);
+  const data=c.getImageData(0,0,out.width,out.height);frames.set(key,data);return data;
  }
  function tinted(p,row,frame){
   const key=[p.gender,p.skin,p.hair,p.shirt,row,frame].join(':');if(cache.has(key))return cache.get(key);
-  const src=base(p.gender,row,frame),out=document.createElement('canvas');out.width=64;out.height=96;
-  const c=out.getContext('2d'),data=c.createImageData(64,96);data.data.set(src.data);
+  const src=base(p.gender,row,frame),out=document.createElement('canvas');out.width=src.width;out.height=src.height;
+  const c=out.getContext('2d'),data=c.createImageData(src.width,src.height);data.data.set(src.data);
   const colors={skin:rgb(palettes.skin[p.skin]||palettes.skin[0]),hair:rgb(palettes.hair[p.hair]||palettes.hair[0]),shirt:rgb(palettes.shirt[p.shirt]||palettes.shirt[0])};
   for(let i=0;i<data.data.length;i+=4){
-   const d=data.data;if(!d[i+3])continue;const r=d[i],g=d[i+1],b=d[i+2],y=Math.floor(i/4/64)/96;
+   const d=data.data;if(!d[i+3])continue;const r=d[i],g=d[i+1],b=d[i+2],y=Math.floor(i/4/src.width)/src.height;
    const max=Math.max(r,g,b),min=Math.min(r,g,b),delta=max-min;
    const hue=delta===0?0:((max===r?(g-b)/delta:max===g?(b-r)/delta+2:(r-g)/delta+4)*60+360)%360;
    if(d[i+3]<8){d[i+3]=0;continue;}
@@ -42,10 +44,10 @@ window.HoublonCharacters = (() => {
    if(kind){const lum=(r*.3+g*.59+b*.11),ref=kind==='hair'?(p.gender==='girl'?115:72):kind==='skin'?183:(p.gender==='girl'?177:75),shade=Math.max(.45,Math.min(1.2,lum/ref));const color=colors[kind];for(let k=0;k<3;k++)d[i+k]=Math.min(255,color[k]*shade);}
 
   }
-  c.putImageData(data,0,0);if(cache.size>512)cache.clear();cache.set(key,out);return out;
+  c.putImageData(data,0,0);if(cache.size>=128)cache.clear();cache.set(key,out);return out;
  }
  function draw(c,x,y,p,walk,dir,height=44){
-  c.save();c.imageSmoothingEnabled=true;
+  c.save();c.imageSmoothingEnabled=true;c.imageSmoothingQuality='high';
   c.fillStyle='#293f3830';c.beginPath();c.ellipse(Math.round(x),Math.round(y),height*.17,height*.045,0,0,Math.PI*2);c.fill();
   if(ready){const row={down:0,left:1,right:2,up:3}[dir]||0,frame=walk?Math.floor(walk/8)%4:1;
    const image=tinted(p,row,frame);c.drawImage(image,Math.round(x-height/3),Math.round(y-height),height*2/3,height);

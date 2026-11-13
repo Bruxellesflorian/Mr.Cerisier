@@ -1,4 +1,18 @@
-# La rue du Houblon — prototype 0.5
+# La rue du Houblon — prototype 0.6
+
+## Deuxième quartier et niveaux
+
+Après avoir réussi les quatre premiers bars, ouvrez **Quartiers** en haut du jeu pour rejoindre la **Place des Lanternes**, ou utilisez le passage au sud du village. Cette carte nocturne possède une place avec fontaine, un circuit périphérique, quatre nouveaux bars et un kiosque de lecture. Le retour au premier quartier reste libre.
+
+Les nouveaux thèmes sont les arômes du houblon, les bulles et la refermentation, la conservation, puis le verre et le service : quatre leçons et seize questions supplémentaires. Les sources figurent dans les leçons et dans `assets/place-lanternes.md`. Les intérieurs de la place reprennent les pièces existantes avec un éclairage teinté et de nouveaux personnages.
+
+Le badge près du portrait commence au **niveau 1**. Chaque bar réussi pour la première fois donne **exactement +1 niveau**, jusqu’au niveau 9 après les huit bars. Les XP restent une récompense distincte pour la future boutique. Rejouer un bar réussi ne redonne ni XP ni niveau. Les anciennes sauvegardes sont conservées et leur niveau est recalculé à partir des bars déjà réussis ; le quartier actuel est également enregistré.
+
+## Commandes tactiles
+
+Posez le pouce sur le décor : un joystick flottant apparaît exactement à cet endroit. Faites glisser le doigt : une petite inclinaison fait marcher doucement, une grande inclinaison atteint la vitesse maximale. Relâcher arrête le personnage et masque le joystick. Il disparaît aussi lorsqu’une fenêtre s’ouvre, que la scène change ou qu’un toucher est interrompu. Le panneau de commandes a été retiré et la zone de jeu occupe l’espace libéré. Les boutons d’interaction ne déclenchent pas le joystick.
+
+Le bouton A est supprimé. Touchez directement la fenêtre contextuelle qui apparaît près d’une porte, du livre, d’un comptoir ou de la sortie. Les flèches du clavier, ZQSD/WASD et la touche E restent disponibles sur ordinateur.
 
 ## Direction minimaliste
 
@@ -8,7 +22,7 @@ La caméra est rapprochée de 35 % dans la rue et de 25 % dans les intérieurs. 
 
 ## Atelier du personnage
 
-Le portrait ouvre un atelier avec un grand aperçu animé, quatre angles de vue, une pause, six teints, six couleurs de cheveux et six couleurs de veste. « Proposer une palette » permet d’essayer une combinaison aléatoire. Enregistrer applique les choix ; fermer annule les modifications.
+Le portrait ouvre un atelier avec un grand aperçu animé. Deux flèches placées de chaque côté du personnage le font pivoter entre face, profils et dos dans les deux sens. L’atelier propose aussi une pause, six teints, six couleurs de cheveux et six couleurs de veste. « Proposer une palette » permet d’essayer une combinaison aléatoire. Enregistrer applique les choix ; fermer annule les modifications.
 
 Les nouveaux sprites possèdent quatre poses de marche dans chacune des quatre directions. Ils mesurent 44 unités dans la rue et 68 dans les intérieurs, contre 26 auparavant. Les personnages des bars utilisent également les nouveaux sprites. `characters.js` gère leur affichage et leurs palettes ; les ressources et prompts sont décrits dans `assets/personnages-v4.md`. Les sauvegardes précédentes restent compatibles.
 
@@ -16,7 +30,7 @@ Les nouveaux sprites possèdent quatre poses de marche dans chacune des quatre d
 
 Les cinq bâtiments ont des architectures différentes : bibliothèque gothique, pub à colombages, brasserie industrielle, serre botanique et bar Art déco. Les cheminées émettent de la fumée et des braises animées. À l’intérieur, les feux scintillent avec une lueur mouvante.
 
-Devant une porte, appuyer sur **E** ou **A à l’écran** pour entrer. On peut alors marcher dans une pièce. À la bibliothèque, rejoindre le grand livre au centre et appuyer sur E ; dans un bar, rejoindre le comptoir et appuyer sur E pour parler au patron et lancer le questionnaire. Les bars suivants restent verrouillés jusqu’à la réussite du précédent.
+Devant une porte, appuyer sur **E** ou toucher la fenêtre d’entrée pour entrer. On peut alors marcher dans une pièce. À la bibliothèque, rejoindre le grand livre au centre et appuyer sur E ; dans un bar, rejoindre le comptoir et appuyer sur E pour parler au patron et lancer le questionnaire. Les bars suivants restent verrouillés jusqu’à la réussite du précédent.
 
 Pour sortir, rejoindre le repère **Sortie** au bas de la pièce puis appuyer sur E, utiliser le bouton **Sortir**, l’onglet **La rue**, ou Échap lorsque aucune fenêtre n’est ouverte. Fermer un questionnaire ramène dans la pièce. La position extérieure reste enregistrée : après rechargement, le personnage reprend devant le bâtiment. Le personnage et les XP existants sont conservés.
 
@@ -39,7 +53,7 @@ Double-cliquer sur **Lancer le jeu.cmd** ou ouvrir **index.html** dans un naviga
 - S'approcher d'une porte puis appuyer sur E, sur le bouton A à l'écran ou sur le bouton d'entrée.
 - La bibliothèque se trouve à gauche, au début de la rue. Les quatre bars se trouvent plus bas, en alternance à droite et à gauche.
 - Lire les quatre chapitres, puis réussir au moins 3 questions sur 4 dans chaque bar.
-- Chaque première réussite attribue des XP et débloque le bar suivant. Un niveau correspond à 100 XP. Rejouer un bar ne redonne pas de points.
+- Chaque première réussite attribue des XP et débloque le bar suivant. Chaque nouveau bar réussi donne un niveau, indépendamment des XP. Rejouer un bar ne redonne pas de points.
 - Consulter le carnet pour la progression, la collection pour les dix bières fictives et le portrait pour modifier le personnage.
 - Les achats sont prévus pour une prochaine version. Les prix affichés sont indicatifs, les XP ne sont pas dépensés.
 
