@@ -1,4 +1,16 @@
-# La rue du Houblon — prototype 0.3
+# La rue du Houblon — prototype 0.5
+
+## Direction minimaliste
+
+Le jeu adopte la planche approuvée : village crème et sauge, cinq intérieurs assortis et personnages illustrés aux silhouettes arrondies. L’interface, les flammes et la fumée suivent cette direction. Les anciens décors sont conservés dans les assets. Les nouveaux fichiers et prompts sont décrits dans `assets/direction-minimaliste.md`.
+
+La caméra est rapprochée de 35 % dans la rue et de 25 % dans les intérieurs. La vitesse passe de 95 à 140 unités par seconde (+47 %), avec une cadence de marche adaptée. Le cadrage réserve de la place au bouton d’interaction pour garder les pieds du personnage visibles. Ces paramètres sont regroupés dans `camera.js`.
+
+## Atelier du personnage
+
+Le portrait ouvre un atelier avec un grand aperçu animé, quatre angles de vue, une pause, six teints, six couleurs de cheveux et six couleurs de veste. « Proposer une palette » permet d’essayer une combinaison aléatoire. Enregistrer applique les choix ; fermer annule les modifications.
+
+Les nouveaux sprites possèdent quatre poses de marche dans chacune des quatre directions. Ils mesurent 44 unités dans la rue et 68 dans les intérieurs, contre 26 auparavant. Les personnages des bars utilisent également les nouveaux sprites. `characters.js` gère leur affichage et leurs palettes ; les ressources et prompts sont décrits dans `assets/personnages-v4.md`. Les sauvegardes précédentes restent compatibles.
 
 ## Entrer et explorer
 

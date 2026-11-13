@@ -2,17 +2,18 @@
 'use strict';
 const $ = id => document.getElementById(id), content = window.HOUBLON_CONTENT;
 const STORE = 'cerisier-houblon-v1';
-const fresh = () => ({name:'Camille',gender:'girl',skin:0,hair:0,shirt:0,created:false,completed:[],read:[],x:300,y:215,streetVersion:2});
+const fresh = () => ({name:'Camille',gender:'girl',skin:0,hair:1,shirt:4,created:false,completed:[],read:[],x:300,y:215,streetVersion:2});
 let state = fresh(), storageOK = true;
 try { const s = JSON.parse(localStorage.getItem(STORE)); if (s && typeof s === 'object') {
  state = {...state,...s, streetVersion:s.streetVersion===2?2:1, name:typeof s.name === 'string' ? s.name.slice(0,18) : 'Camille',completed:[...new Set((Array.isArray(s.completed)?s.completed:[]).filter(n=>Number.isInteger(n)&&n>=0&&n<4))],read:[...new Set((Array.isArray(s.read)?s.read:[]).filter(n=>Number.isInteger(n)&&n>=0&&n<4))]};
- for(const k of ['skin','hair','shirt']) if(!Number.isInteger(state[k])||state[k]<0||state[k]>3)state[k]=0;
+ for(const k of ['skin','hair','shirt']) if(!Number.isInteger(state[k])||state[k]<0||state[k]>5)state[k]=0;
  if(!['girl','boy'].includes(state.gender))state.gender='girl';
  if(!Number.isFinite(state.x)||!Number.isFinite(state.y)) {state.x=300;state.y=215;}
 }} catch {storageOK=false;}
-const skins=['#efc099','#c58c63','#946548','#624433'], hairs=['#553d32','#b67a37','#d6bc77','#343a39'], shirts=['#d57b56','#6d94a1','#9b81b5','#739364'];
+const characters=window.HoublonCharacters,{skin:skins,hair:hairs,shirt:shirts}=characters.palettes;
+let previewDirection='down',previewMoving=true;
 const canvas=$('world'), ctx=canvas.getContext('2d');canvas.width=720;canvas.height=920;ctx.setTransform(2,0,0,2,0,0);ctx.imageSmoothingEnabled=false;
-const street=window.HoublonStreet, interiors=window.HoublonInteriors;let cameraX=0,room=null;
+const view=window.HoublonView,street=window.HoublonStreet, interiors=window.HoublonInteriors;let cameraX=0,room=null;
 if(state.streetVersion!==2){state.x=300;state.y=215;state.streetVersion=2;}
 const keys=new Set();let camera=0,last=0,step=0,near=null,toastTimer,quiz=null,draft=null,lastFocus=null;
 const buildings=street.doors;
@@ -21,14 +22,36 @@ function xp(){return state.completed.reduce((sum,i)=>sum+content.bars[i].reward,
 function save(){try{localStorage.setItem(STORE,JSON.stringify(state));}catch{storageOK=false;} }
 function unlocked(i){return i===0||state.completed.includes(i-1)}
 function notify(message){$('toast').textContent=message;$('toast').style.display='block';clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('toast').style.display='none',3200);}
-function hud(){const total=xp();$('player-name').textContent=state.name;$('rank').textContent=`Niveau ${1+Math.floor(total/100)} · ${total>=500?'Connaisseur':total>=250?'Explorateur':'Curieux'}`;$('xp').textContent=total;$('xp-fill').style.width=(total%100)+'%';$('progress').textContent=`${state.completed.length} / 4 bars maîtrisés`;const next=content.bars.findIndex((_,i)=>!state.completed.includes(i));$('quest').innerHTML=state.read.length===0?'PREMIÈRE ESCALE<strong>← Bibliothèque · première ruelle</strong>':next<0?'AVENTURE ACCOMPLIE<strong>Les quatre bars vous accueillent !</strong>':`PROCHAINE ESCALE<strong>${escape(content.bars[next].name)}</strong>`;const ac=$('avatar').getContext('2d');ac.clearRect(0,0,32,32);person(ac,16,28,state,0,'down');placeHUD();}
+function hud(){const total=xp();$('player-name').textContent=state.name;$('rank').textContent=`Niveau ${1+Math.floor(total/100)} · ${total>=500?'Connaisseur':total>=250?'Explorateur':'Curieux'}`;$('xp').textContent=total;$('xp-fill').style.width=(total%100)+'%';$('progress').textContent=`${state.completed.length} / 4 bars maîtrisés`;const next=content.bars.findIndex((_,i)=>!state.completed.includes(i));$('quest').innerHTML=state.read.length===0?'PREMIÈRE ESCALE<strong>← Bibliothèque · première ruelle</strong>':next<0?'AVENTURE ACCOMPLIE<strong>Les quatre bars vous accueillent !</strong>':`PROCHAINE ESCALE<strong>${escape(content.bars[next].name)}</strong>`;const ac=$('avatar').getContext('2d');ac.clearRect(0,0,96,96);person(ac,48,93,state,0,'down',88);placeHUD();}
 function modal(tag,html,closable=true){keys.clear();lastFocus=document.activeElement;$('overlay').hidden=false;$('sheet-tag').textContent=tag;$('sheet-content').innerHTML=html;$('close').hidden=!closable;document.querySelector('.sheet').scrollTop=0;requestAnimationFrame(()=>{const focus=$('sheet-content').querySelector('input,button');(focus||$('close')).focus();});}
 function close(){if(!state.created)return;$('overlay').hidden=true;quiz=null;draft=null;keys.clear();save();(lastFocus?.isConnected?lastFocus:canvas).focus();}
 $('close').onclick=close;
-function createCharacter(){draft={...state};modal('FAITES CONNAISSANCE',`<h2 id="sheet-title">Votre aventure,<br>votre personnage.</h2><p>Choisissez votre style avant de rejoindre la rue.</p><div class="character-stage"><canvas id="preview" width="32" height="32"></canvas><span>PRÊT À EXPLORER</span></div><label class="form-label" for="name">Votre prénom</label><input id="name" maxlength="18" value="${escape(state.name)}" autocomplete="off"><span class="form-label">Personnage</span><div class="choices" id="gender"><button data-value="girl">Fille</button><button data-value="boy">Garçon</button></div>${[['skin','Teint',skins],['hair','Cheveux',hairs],['shirt','Vêtement',shirts]].map(([key,label,colors])=>`<span class="form-label">${label}</span><div class="choices" id="${key}">${colors.map((c,i)=>`<button class="swatch" style="background:${c}" data-value="${i}" aria-label="${label}, teinte ${i+1}"></button>`).join('')}</div>`).join('')}<button id="begin" class="primary">${state.created?'Enregistrer mon personnage':'Entrer dans la rue →'}</button>`,state.created);
- function refresh(){for(const key of ['gender','skin','hair','shirt']) for(const b of $(key).children){const active=String(draft[key])===b.dataset.value;b.classList.toggle('active',active);b.setAttribute('aria-pressed',active);}const c=$('preview').getContext('2d');c.clearRect(0,0,32,32);person(c,16,28,draft,0,'down');}
+function paintPreview(){
+ const el=$('preview');if(!draft||!el)return;
+ const c=el.getContext('2d');c.clearRect(0,0,192,192);
+ const animated=previewMoving&&!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+ person(c,96,177,draft,animated?performance.now()/1000*60:0,previewDirection,160);
+}
+function createCharacter(){
+ draft={...state};previewDirection='down';previewMoving=true;
+ modal('L’ATELIER DU PERSONNAGE',`<h2 id="sheet-title">Donnez vie à<br>votre voyageur.</h2><p>Une silhouette expressive, vos couleurs et une petite sacoche pour partir explorer.</p>
+ <div class="character-stage detailed"><canvas id="preview" width="192" height="192" aria-label="Aperçu animé du personnage"></canvas><span>APERÇU EN JEU</span><button id="preview-motion" aria-pressed="true">Ⅱ Pause</button></div>
+ <div class="choices preview-views" id="preview-views">${[['down','Face'],['left','Gauche'],['up','Dos'],['right','Droite']].map(([d,label])=>`<button data-dir="${d}" class="${d==='down'?'active':''}" aria-pressed="${d==='down'}">${label}</button>`).join('')}</div>
+ <label class="form-label" for="name">Votre prénom</label><input id="name" maxlength="18" value="${escape(state.name)}" autocomplete="off">
+ <span class="form-label">Personnage</span><div class="choices" id="gender"><button data-value="girl">Fille · cheveux attachés</button><button data-value="boy">Garçon · cheveux courts</button></div>
+ ${[['skin','Teint',skins],['hair','Cheveux',hairs],['shirt','Veste',shirts]].map(([key,label,colors])=>`<span class="form-label">${label} <small id="label-${key}"></small></span><div class="choices" id="${key}">${colors.map((c,i)=>`<button class="swatch" style="background:${c}" data-value="${i}" title="${characters.names[key][i]}" aria-label="${label} : ${characters.names[key][i]}"></button>`).join('')}</div>`).join('')}
+ <button class="book random-look" id="random-look">✦ Proposer une palette</button><button id="begin" class="primary">${state.created?'Enregistrer mon personnage':'Entrer dans la rue →'}</button>`,state.created);
+ function refresh(){
+  for(const key of ['gender','skin','hair','shirt'])for(const b of $(key).children){const active=String(draft[key])===b.dataset.value;b.classList.toggle('active',active);b.setAttribute('aria-pressed',active);}
+  for(const key of ['skin','hair','shirt'])$('label-'+key).textContent=characters.names[key][draft[key]];
+  paintPreview();
+ }
  for(const key of ['gender','skin','hair','shirt'])$(key).onclick=e=>{const b=e.target.closest('button');if(!b)return;draft[key]=key==='gender'?b.dataset.value:Number(b.dataset.value);refresh();};
- $('begin').onclick=()=>{const first=!state.created;Object.assign(state,draft,{name:$('name').value.trim()||'Camille',created:true});save();hud();close();if(first)notify('Bienvenue ! Approchez-vous de la porte de la bibliothèque, à gauche.');};refresh();}
+ $('preview-views').onclick=e=>{const b=e.target.closest('button');if(!b)return;previewDirection=b.dataset.dir;for(const v of $('preview-views').children){const active=v===b;v.classList.toggle('active',active);v.setAttribute('aria-pressed',active);}paintPreview();};
+ $('preview-motion').onclick=()=>{previewMoving=!previewMoving;$('preview-motion').textContent=previewMoving?'Ⅱ Pause':'▶ Marcher';$('preview-motion').setAttribute('aria-pressed',previewMoving);paintPreview();};
+ $('random-look').onclick=()=>{for(const key of ['skin','hair','shirt'])draft[key]=Math.floor(Math.random()*characters.palettes[key].length);refresh();};
+ $('begin').onclick=()=>{const first=!state.created;Object.assign(state,draft,{name:$('name').value.trim()||'Camille',created:true});save();hud();close();if(first)notify('Bienvenue ! Approchez-vous de la porte de la bibliothèque, à gauche.');};refresh();
+}
 function library(){modal('LA BIBLIOTHÈQUE',`<h2 id="sheet-title">Un peu de savoir<br>avant le comptoir.</h2><p>Quatre petits chapitres pour préparer les quatre défis de la rue.</p>${content.chapters.map((ch,i)=>`<button class="book" data-chapter="${i}"><strong>${state.read.includes(i)?'✓':'▤'} ${ch.title}</strong><small>${ch.subtitle} · Bar ${i+1}</small></button>`).join('')}<p class="tiny">Contenu de démonstration. Le cours et les questions de Mr Cerisier seront intégrés lorsqu’ils seront disponibles dans le dossier.</p>`);document.querySelectorAll('[data-chapter]').forEach(b=>b.onclick=()=>chapter(+b.dataset.chapter));}
 function chapter(i){const ch=content.chapters[i];modal(`BIBLIOTHÈQUE · CHAPITRE ${i+1}`,`<h2 id="sheet-title">${ch.title}</h2><p>${ch.text}</p><div class="card"><span class="pill">À RETENIR</span><p>${ch.takeaway}</p></div><button class="primary" id="read">${state.read.includes(i)?'Déjà lu · Revenir aux chapitres':'J’ai lu · Revenir aux chapitres'}</button>`);$('read').onclick=()=>{if(!state.read.includes(i))state.read.push(i);save();hud();library();};}
 function barIntro(i){const b=content.bars[i];if(!unlocked(i)){notify(`Terminez d’abord « ${content.bars[i-1].name} » pour ouvrir ce bar.`);return;}modal(`BAR ${i+1} / 4 · ${b.theme.toUpperCase()}`,`<div class="result-icon">♜</div><h2 id="sheet-title">${b.name}</h2><p>Le patron vous propose quatre questions sur ${b.theme.toLowerCase()}. Obtenez au moins <b>3 bonnes réponses sur 4</b> pour réussir.</p><div class="card"><span class="pill">${state.completed.includes(i)?'DÉFI DÉJÀ RÉUSSI':`RÉCOMPENSE · +${b.reward} XP`}</span><p>${state.completed.includes(i)?'Vous pouvez rejouer pour vous entraîner. Les XP sont attribués une seule fois.':i<3?`Débloquez aussi « ${content.bars[i+1].name} ».`:'Dernière étape pour compléter votre aventure !'}</p></div><button class="primary" id="start-quiz">Relever le défi →</button><button class="book" id="revise"><strong>▤ Revoir le chapitre</strong><small>${content.chapters[i].title}</small></button>`);$('start-quiz').onclick=()=>{quiz={bar:i,index:0,score:0,answered:false};question();};$('revise').onclick=()=>chapter(i);}
@@ -67,8 +90,8 @@ window.addEventListener('keydown',e=>{if(!$('overlay').hidden){if(e.key==='Escap
 window.addEventListener('keyup',e=>keys.delete(mapping[e.key]||mapping[e.key.toLowerCase()]));window.addEventListener('blur',()=>{keys.clear();save();});document.addEventListener('visibilitychange',()=>{if(document.hidden){keys.clear();save();}});window.addEventListener('pagehide',save);
 document.querySelectorAll('[data-dir]').forEach(b=>{b.addEventListener('pointerdown',e=>{e.preventDefault();b.setPointerCapture(e.pointerId);keys.add(b.dataset.dir);});for(const event of ['pointerup','pointercancel','lostpointercapture'])b.addEventListener(event,()=>keys.delete(b.dataset.dir));});
 function rect(c,x,y,w,h,color){c.fillStyle=color;c.fillRect(Math.round(x),Math.round(y),w,h)}
-function person(c,x,y,p,walk,dir){x=Math.round(x);y=Math.round(y);const skin=skins[p.skin],hair=hairs[p.hair],shirt=shirts[p.shirt];rect(c,x-7,y-1,15,3,'#344f3e45');const leg=walk?Math.floor(walk/7)%2:0;rect(c,x-5,y-7+leg,4,6,'#3c4843');rect(c,x+2,y-7-leg,4,6,'#3c4843');rect(c,x-6,y-2+leg,5,2,'#293b33');rect(c,x+2,y-2-leg,5,2,'#293b33');if(p.gender==='girl')rect(c,x-7,y-20,14,12,hair);rect(c,x-6,y-15,13,9,shirt);rect(c,x-8,y-13+leg,3,7,skin);rect(c,x+7,y-13-leg,3,7,skin);rect(c,x-5,y-24,11,11,skin);rect(c,x-6,y-25,13,5,hair);rect(c,x-6,y-21,3,5,hair);if(dir==='up'){rect(c,x-5,y-22,11,9,hair);}else{if(dir!=='right')rect(c,x-2,y-19,1,2,'#293b33');if(dir!=='left')rect(c,x+4,y-19,1,2,'#293b33');rect(c,x+1,y-15,2,1,'#a65f47');}rect(c,x-4,y-14,9,2,'#ffffff28');}
-function draw(){if(room){interiors.paint(ctx,room,person,state,step,direction);return;}street.paint(ctx,cameraX,camera,state,near,unlocked);ctx.save();ctx.translate(-Math.round(cameraX),-Math.round(camera));person(ctx,state.x,state.y,state,step,direction);ctx.restore();}
+function person(c,x,y,p,walk,dir,height=44){characters.draw(c,x,y,p,walk,dir,height);}
+function draw(){if(room){interiors.paint(ctx,room,person,state,step,direction);return;}street.paint(ctx,cameraX,camera,state,near,unlocked);ctx.save();ctx.scale(view.streetZoom,view.streetZoom);ctx.translate(-cameraX,-camera);person(ctx,state.x,state.y,state,step,direction);ctx.restore();}
 let direction='down';function blocked(x,y){return !street.canWalk(x,y);}
 if(blocked(state.x,state.y)){state.x=300;state.y=215;}
 function frame(now){
@@ -77,12 +100,12 @@ function frame(now){
  if($('overlay').hidden){
   dx=(keys.has('right')?1:0)-(keys.has('left')?1:0);dy=(keys.has('down')?1:0)-(keys.has('up')?1:0);
   if(dx||dy){
-   const speed=95*dt/(dx&&dy?Math.SQRT2:1),actor=room||state;
+   const speed=view.moveSpeed*dt/(dx&&dy?Math.SQRT2:1),actor=room||state;
    const canMove=room?interiors.canWalk:street.canWalk;
    const nx=actor.x+dx*speed,ny=actor.y+dy*speed;
    if(canMove(nx,actor.y))actor.x=nx;
    if(canMove(actor.x,ny))actor.y=ny;
-   direction=Math.abs(dy)?dy>0?'down':'up':dx>0?'right':'left';step+=dt*60;
+   direction=Math.abs(dy)?dy>0?'down':'up':dx>0?'right':'left';step+=dt*60*(view.moveSpeed/95);
   }else step=0;
  }
  let label,available=false;
@@ -90,12 +113,12 @@ function frame(now){
   const target=interiors.target(room);available=!!target;
   label=target==='exit'?'E · Sortir dans la rue':target==='host'?(room.door.type==='library'?'E · Consulter le grand livre':'E · Parler au patron'):'Explorez · Rejoignez le livre ou le comptoir';
  }else{
-  camera=Math.max(0,Math.min(street.height-460,state.y-230));cameraX=Math.max(0,Math.min(street.width-360,state.x-180));
+  const framing=view.follow(state.x,state.y,street.width,street.height,view.streetZoom);camera=framing.y;cameraX=framing.x;
   near=buildings.find(b=>Math.hypot(state.x-b.x,state.y-b.y)<23)||null;available=!!near;
   label=near?(near.type==='library'?'E · Entrer dans la bibliothèque':unlocked(near.index)?`E · Entrer : ${content.bars[near.index].name}`:'🔒 Réussissez le bar précédent'):'Approchez-vous d’une porte';
  }
  if($('interact').textContent!==label)$('interact').textContent=label;
- $('interact').disabled=!available;draw();requestAnimationFrame(frame);
+ $('interact').disabled=!available;draw();if(draft&&!$('overlay').hidden)paintPreview();requestAnimationFrame(frame);
 }
-hud();requestAnimationFrame(frame);if(!state.created)createCharacter();
+window.addEventListener('characters-ready',hud);hud();requestAnimationFrame(frame);if(!state.created)createCharacter();
 })();
