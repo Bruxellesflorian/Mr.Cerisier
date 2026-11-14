@@ -16,7 +16,8 @@ window.HoublonCharacters=(()=>{
   const t=(p-.6)/.4,s=t*t*(3-2*t);
   return {reach:mix(-13,13,s),lift:8*Math.sin(Math.PI*t)};
  }
- function draw(c,x,y,p,walk,dir,height=44){
+ function draw(c,x,y,p,walk,dir,height=44,pose={}){
+  const seated=!!pose.seated,sip=seated?Math.max(0,Math.min(1,pose.sip||0)):0;if(seated)walk=0;
   let actors=motion.get(c);if(!actors){actors=new WeakMap();motion.set(c,actors);}
   const now=performance.now()/1000,previous=actors.get(p)||{time:now,amount:0,phase:0,walk:0};
   const dt=Math.min(.05,Math.max(0,now-previous.time)),target=walk>0?1:0;
@@ -26,7 +27,7 @@ window.HoublonCharacters=(()=>{
   const side=dir==='left'||dir==='right',back=dir==='up',moving=amount>.001,female=p.gender==='girl';
   const bob=Math.cos(phase*TAU*2)*.8*amount;
   const skin=palettes.skin[p.skin]||palettes.skin[0],hair=palettes.hair[p.hair]||palettes.hair[0],coat=palettes.shirt[p.shirt]||palettes.shirt[0];
-  c.save();c.translate(x,y);c.scale(height/100,height/100);if(dir==='left')c.scale(-1,1);
+  c.save();c.translate(x,y+(seated?height*.32:0));c.scale(height/100,height/100);if(dir==='left')c.scale(-1,1);
   c.lineCap='round';c.lineJoin='round';
   function oval(px,py,rx,ry,color){c.fillStyle=color;c.beginPath();c.ellipse(px,py,rx,ry,0,0,TAU);c.fill();}
   function line(ax,ay,bx,by,width,color){c.strokeStyle=color;c.lineWidth=width;c.beginPath();c.moveTo(ax,ay);c.lineTo(bx,by);c.stroke();}
@@ -39,10 +40,10 @@ window.HoublonCharacters=(()=>{
    const raw=gait(phase+offset),g={reach:raw.reach*amount,lift:raw.lift*amount};
    return {i,g,hipX:side?0:(i?6:-6),footX:side?g.reach:(i?6:-6),footY:-3-g.lift+(side?0:g.reach*(back?-.22:.22))};
   });
-  oval(0,0,16,4,'#16231e30');
+  if(!seated)oval(0,0,16,4,'#16231e30');
   function leg(l,far){
    // Front/back foreshortening stays vertical; knees only bend sideways in profile.
-   const hx=l.hipX,hy=-32+bob,k=side?joint(hx,hy,l.footX,l.footY,18,1):[hx,(hy+l.footY)/2];
+   const hx=l.hipX,hy=-32+bob;if(seated){const kneeX=side?14:hx,kneeY=-25,footX=side?16:hx;const color=far?'#50483e':'#6a6050';line(hx,hy,kneeX,kneeY,9,color);line(kneeX,kneeY,footX,-10,8,color);box(footX-4,-13,side?12:9,6,3,'#453b30');return;}const k=side?joint(hx,hy,l.footX,l.footY,18,1):[hx,(hy+l.footY)/2];
    const color=far?'#50483e':'#6a6050';
    line(hx,hy,k[0],k[1],9,color);line(k[0],k[1],l.footX,l.footY-2,8,color);
    box(l.footX-4,l.footY-5,side?13:9,6,3,far?'#342e29':'#453b30');
@@ -50,7 +51,7 @@ window.HoublonCharacters=(()=>{
   function arm(i,far){
    const swing=moving?Math.sin((phase+i*.5)*TAU)*10*amount:0;
    const ax=side?0:(i?13:-13),ay=-58+bob;
-   const handX=side?-swing+2:ax+(i?1:-1)*2,handY=-34+bob+(side?0:swing*.25);
+   const handX=pose.pumping&&!i?(side?18:13):seated?(i?side?1:-10:side?14:10):side?-swing+2:ax+(i?1:-1)*2,handY=pose.pumping&&!i?-62+17*(pose.pump||0):seated?-39-(i?0:29*sip):-34+bob+(side?0:swing*.25);
    const k=joint(ax,ay,handX,handY,14,side?-1:(i?1:-1));
    line(ax,ay,k[0],k[1],8,coat);line(k[0],k[1],handX,handY-2,7,coat);oval(handX,handY,3.8,4.5,skin);
    if(far){c.fillStyle='#17251d20';c.beginPath();c.ellipse(handX,handY,3.8,4.5,0,0,TAU);c.fill();}
@@ -70,6 +71,8 @@ window.HoublonCharacters=(()=>{
   const bagX=side?-10:(back?6:-16),bagY=-39+bob+(moving?Math.sin(phase*TAU-.4)*.7:0);
   box(bagX,bagY,12,13,4,'#93623e');box(bagX,bagY,12,5,3,'#ad7b4d');oval(bagX+6,bagY+6,1,1,'#d5b779');
   arm(0,false);
+  function drink(){if((seated&&pose.beer)||pose.carryBeer){const mx=side?16:12,my=-39-29*sip;c.save();c.translate(mx,my);c.rotate(-sip*.3);box(-4,-7,9,13,2,'#e8b451');box(-4,-8,9,3,1,'#fff0c9');c.strokeStyle='#e4d6ad';c.lineWidth=2;c.beginPath();c.arc(6,-1,4,-Math.PI/2,Math.PI/2);c.stroke();c.restore();}}
+  if(back)drink();
   const headY=-78+bob*.65;
   if(female){
    oval(side?-15:12,headY+4,8,15,hair);
@@ -86,6 +89,7 @@ window.HoublonCharacters=(()=>{
    else{oval(-6,headY+1,1.5,2,'#302c29');oval(6,headY+1,1.5,2,'#302c29');c.strokeStyle='#875a43';c.lineWidth=1;c.beginPath();c.arc(0,headY+6,4,.2,Math.PI-.2);c.stroke();}
   }
   if(female&&back){oval(0,headY+7,8,12,hair);box(-4,headY-1,8,4,2,coat);}
+  if(!back)drink();
   c.restore();
  }
  return {draw,palettes,names,ready:true,gait};

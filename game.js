@@ -13,7 +13,7 @@ try { const s = JSON.parse(localStorage.getItem(STORE)); if (s && typeof s === '
 const characters=window.HoublonCharacters,{skin:skins,hair:hairs,shirt:shirts}=characters.palettes;
 let previewDirection='down',previewMoving=true;
 const canvas=$('world'), ctx=canvas.getContext('2d');canvas.width=720;canvas.height=920;ctx.setTransform(2,0,0,2,0,0);ctx.imageSmoothingEnabled=false;
-const view=window.HoublonView,street=window.HoublonStreet, interiors=window.HoublonInteriors;let cameraX=0,room=null;
+const view=window.HoublonView,street=window.HoublonStreet, interiors=window.HoublonInteriors;let cameraX=0,room=null,personalBar=null;
 if(state.streetVersion!==2){state.x=300;state.y=215;state.streetVersion=2;}
 const stick=window.HoublonJoystick.attach(canvas,$('joystick'),()=>$('overlay').hidden);
 function resizeViewport(){
@@ -77,17 +77,19 @@ function chapter(i){const ch=content.chapters[i];modal(`BIBLIOTHÈQUE · CHAPITR
 const portraits=window.HoublonPortraits;
 function barIntro(i){const b=content.bars[i];if(!unlocked(i)){notify(`Terminez d’abord « ${content.bars[i-1].name} » pour ouvrir ce bar.`);return;}modal(`BAR ${i+1} / ${content.bars.length} · ${b.theme.toUpperCase()}`,`${portraits.html(i)}<h2 id="sheet-title">${b.name}</h2><p>Ce bar est consacré au thème « ${b.theme} ». Étape ${i+1} / 12 : quatre questions pour découvrir ce style, avec trois choix par question. Obtenez au moins <b>3 bonnes réponses sur 4</b> pour réussir.</p><div class="card"><span class="pill">${state.completed.includes(i)?'DÉFI DÉJÀ RÉUSSI':`RÉCOMPENSE · +${b.reward} XP`}</span><p>${state.completed.includes(i)?'Vous pouvez rejouer pour vous entraîner. Les XP sont attribués une seule fois.':i<content.bars.length-1?`Débloquez aussi « ${content.bars[i+1].name} ».`:'Dernière étape pour compléter votre aventure !'}</p></div><button class="primary" id="start-quiz">Relever le défi →</button><button class="book" id="revise"><strong>▤ Revoir le chapitre</strong><small>${content.chapters[i].title}</small></button>`);$('start-quiz').onclick=()=>{quiz={bar:i,index:0,score:0,answered:false};question();};$('revise').onclick=()=>chapter(i);}
 function question(){const q=quiz,b=content.bars[q.bar],data=b.questions[q.index];q.answered=false;q.portraitFrame=portraits.next(q.portraitFrame);modal(`${b.name.toUpperCase()} · ${q.index+1} / 4`,`${portraits.html(q.bar,q.portraitFrame)}<div class="quiz-progress">${b.questions.map((_,i)=>`<i class="${i<=q.index?'done':''}"></i>`).join('')}</div><h2 id="sheet-title" style="font-size:23px">${data[0]}</h2>${data[1].map((a,i)=>`<button class="answer" data-answer="${i}">${String.fromCharCode(65+i)}. ${a}</button>`).join('')}<div id="answer-feedback" aria-live="polite"></div><button class="primary" id="next" hidden>${q.index===3?'Voir le résultat':'Question suivante →'}</button>`);document.querySelectorAll('[data-answer]').forEach(button=>button.onclick=()=>{if(q.answered)return;q.answered=true;const answer=+button.dataset.answer,correct=answer===data[2];q.portraitFrame=correct?3:4;portraits.react(q.portraitFrame);window.HoublonAudio.sfx(correct?'correct':'wrong');if(correct)q.score++;document.querySelectorAll('[data-answer]').forEach(a=>{a.disabled=true;if(+a.dataset.answer===data[2])a.classList.add('correct');});if(!correct)button.classList.add('wrong');$('answer-feedback').innerHTML=`<div class="feedback"><b>${correct?'Bien joué !':'À retenir pour la suite'}</b><br>${data[3]}</div>`;$('next').hidden=false;$('next').scrollIntoView({block:'nearest',behavior:'smooth'});});$('next').onclick=()=>{if(!q.answered)return;if(q.index<3){q.index++;question();}else result();};}
-function result(){const q=quiz,b=content.bars[q.bar],success=q.score>=3,earned=success&&!state.completed.includes(q.bar)?b.reward:0;if(success)window.HoublonAudio.sfx('win');if(earned){state.completed.push(q.bar);save();hud();}modal(success?'DÉFI RÉUSSI':'ON APPREND À CHAQUE ESSAI',`${portraits.html(q.bar,success?5:4)}<div class="result-icon">${success?'✦':'▤'}</div><h2 id="sheet-title">${success?'Bien joué, '+escape(state.name)+' !':'Presque au bout !'}</h2><p>${q.score} bonne${q.score>1?'s':''} réponse${q.score>1?'s':''} sur 4. ${success?'Le patron salue vos connaissances.':'Il en faut 3 pour débloquer la suite. Relisez le chapitre et retentez votre chance.'}</p>${earned?`<div class="reward">Niveau ${level()} !<p>+1 niveau · +${earned} XP</p></div>`:''}<div class="card"><p>${success?(q.bar===content.bars.length-1?'Les douze bars sont maîtrisés. Les trois quartiers vous accueillent !':q.bar===7?'Le Quartier des Brumes est débloqué ! Touchez Quartiers pour continuer.':q.bar===3?'La Place des Lanternes est débloquée ! Sortez puis touchez Quartiers pour continuer.':`« ${content.bars[q.bar+1].name} » vous ouvre ses portes.`):'Votre progression est conservée. Vous pouvez recommencer autant de fois que vous le souhaitez.'}</p></div><button class="primary" id="result-action">${success?'Revenir dans le bar →':'Réessayer le défi →'}</button>${!success?'<button class="book" id="review">Relire le chapitre</button>':''}`);$('result-action').onclick=success?close:()=>barIntro(q.bar);if(!success)$('review').onclick=()=>chapter(q.bar);}
-function journal(){modal('VOTRE CARNET',`<h2 id="sheet-title">Un pavé à la fois.</h2><p>${xp()} XP gagnés · ${state.read.length} / ${content.chapters.length} chapitres lus · ${state.completed.length} / ${content.bars.length} défis réussis. Niveau ${level()}.</p>${content.bars.map((b,i)=>`<div class="card"><strong style="font-size:13px">${state.completed.includes(i)?'✓':unlocked(i)?'◇':'▣'} ${b.name}</strong><p>${b.theme} · ${b.reward} XP<br>${state.completed.includes(i)?'Défi réussi':unlocked(i)?'Ouvert : rendez-vous à sa porte':'Réussissez le bar précédent pour entrer'}</p></div>`).join('')}<p class="tiny">${storageOK?'Progression enregistrée dans ce navigateur.':'La sauvegarde locale est indisponible dans ce navigateur.'} Chaque nouveau bar réussi donne exactement un niveau. Rejouer un bar ne donne ni niveau ni XP supplémentaires. Les points gagnés permettent d’aménager votre bar. Le budget disponible est affiché dans « Mon bar » ; les dépenses ne diminuent pas votre niveau.</p><button class="danger" id="reset">Recommencer l’aventure</button>`);$('reset').onclick=()=>{modal('NOUVEAU DÉPART',`<h2 id="sheet-title">Repartir de zéro ?</h2><p>Le personnage, les chapitres lus, votre bar et les XP de cette aventure seront effacés sur ce navigateur.</p><button class="primary" id="confirm-reset">Oui, recommencer</button><button class="book" id="cancel-reset">Garder mon aventure</button>`);$('cancel-reset').onclick=journal;$('confirm-reset').onclick=()=>{room=null;state=fresh();street.select(0);buildings=street.doors;save();hud();createCharacter();};};}
+function result(){const q=quiz,b=content.bars[q.bar],success=q.score>=3,earned=success&&!state.completed.includes(q.bar)?b.reward:0;if(success)window.HoublonAudio.sfx('win');if(earned){state.completed.push(q.bar);save();hud();}modal(success?'DÉFI RÉUSSI':'ON APPREND À CHAQUE ESSAI',`${portraits.html(q.bar,success?5:4)}<div class="result-icon">${success?'✦':'▤'}</div><h2 id="sheet-title">${success?'Bien joué, '+escape(state.name)+' !':'Presque au bout !'}</h2><p>${q.score} bonne${q.score>1?'s':''} réponse${q.score>1?'s':''} sur 4. ${success?'Le patron salue vos connaissances.':'Il en faut 3 pour débloquer la suite. Relisez le chapitre et retentez votre chance.'}</p>${earned?`<div class="reward">Niveau ${level()} !<p>+1 niveau · +${earned} XP<br>Fût débloqué : ${b.theme}</p></div>`:''}<div class="card"><p>${success?(q.bar===content.bars.length-1?'Les douze bars sont maîtrisés. Les trois quartiers vous accueillent !':q.bar===7?'Le Quartier des Brumes est débloqué ! Touchez Quartiers pour continuer.':q.bar===3?'La Place des Lanternes est débloquée ! Sortez puis touchez Quartiers pour continuer.':`« ${content.bars[q.bar+1].name} » vous ouvre ses portes.`):'Votre progression est conservée. Vous pouvez recommencer autant de fois que vous le souhaitez.'}</p></div><button class="primary" id="result-action">${success?'Revenir dans le bar →':'Réessayer le défi →'}</button>${!success?'<button class="book" id="review">Relire le chapitre</button>':''}`);$('result-action').onclick=success?close:()=>barIntro(q.bar);if(!success)$('review').onclick=()=>chapter(q.bar);}
+function journal(){modal('VOTRE CARNET',`<h2 id="sheet-title">Un pavé à la fois.</h2><p>${xp()} XP gagnés · ${state.read.length} / ${content.chapters.length} chapitres lus · ${state.completed.length} / ${content.bars.length} défis réussis. Niveau ${level()}.</p>${content.bars.map((b,i)=>`<div class="card"><strong style="font-size:13px">${state.completed.includes(i)?'✓':unlocked(i)?'◇':'▣'} ${b.name}</strong><p>${b.theme} · ${b.reward} XP<br>${state.completed.includes(i)?'Défi réussi':unlocked(i)?'Ouvert : rendez-vous à sa porte':'Réussissez le bar précédent pour entrer'}</p></div>`).join('')}<p class="tiny">${storageOK?'Progression enregistrée dans ce navigateur.':'La sauvegarde locale est indisponible dans ce navigateur.'} Chaque nouveau bar réussi donne exactement un niveau. Rejouer un bar ne donne ni niveau ni XP supplémentaires. Les points gagnés permettent d’aménager votre bar. Le budget disponible est affiché dans « Mon bar » ; les dépenses ne diminuent pas votre niveau.</p><button class="danger" id="reset">Recommencer l’aventure</button>`);$('reset').onclick=()=>{modal('NOUVEAU DÉPART',`<h2 id="sheet-title">Repartir de zéro ?</h2><p>Le personnage, les chapitres lus, votre bar et les XP de cette aventure seront effacés sur ce navigateur.</p><button class="primary" id="confirm-reset">Oui, recommencer</button><button class="book" id="cancel-reset">Garder mon aventure</button>`);$('cancel-reset').onclick=journal;$('confirm-reset').onclick=()=>{personalBar=null;room=null;state=fresh();street.select(0);buildings=street.doors;save();hud();createCharacter();};};}
 function collection(){modal('LA COLLECTION · APERÇU',`<h2 id="sheet-title">Dix découvertes<br>à venir.</h2><p>La future boutique permettra de dépenser vos points. Voici ses dix premières bières fictives, à collectionner dans le jeu.</p><div class="card"><span class="pill">${xp()} XP GAGNÉS</span><p>Achats disponibles dans une prochaine version. Prix indicatifs.</p></div><div class="beer-grid">${content.beers.map(b=>`<article class="beer-card"><span class="bottle" style="--beer:${b[2]}"></span><strong>${b[0]}</strong><small>${b[1]}</small><small>${b[3]} XP · bientôt</small></article>`).join('')}</div>`);}
 function help(){modal('BIENVENUE DANS LE QUARTIER',`<h2 id="sheet-title">À vous la rue.</h2><p><b>1. Marchez.</b> Utilisez les flèches du clavier, ZQSD, WASD ou posez le pouce sur le décor : un joystick apparaît sous votre doigt. Faites-le glisser pour avancer, puis relâchez pour le masquer. Plus vous l’écartez du centre, plus vous marchez vite.</p><p><b>2. Entrez.</b> Approchez-vous d’une porte et touchez la fenêtre d’entrée qui apparaît (ou appuyez sur E au clavier).</p><p><b>3. Apprenez.</b> Dans la bibliothèque, avancez vers le grand livre et touchez la fenêtre pour lire. Dans les bars, rejoignez le comptoir pour lancer le défi. Chaque bar correspond à l’un d’eux.</p><p><b>4. Progressez.</b> Réussissez 3 questions sur 4 pour gagner des XP, un niveau et ouvrir le bar suivant. Après les quatre premiers bars, le bouton Quartiers donne accès à la place de nuit. Après huit bars réussis, découvrez le Quartier des Brumes. Descendez la rue et empruntez les ruelles latérales pour rejoindre les portes. La caméra suit votre personnage.</p><p>Le carnet suit votre parcours. Touchez votre portrait pour changer de style. À l’intérieur, la sortie se trouve en bas. Le bouton Sortir ou Échap permet aussi de rejoindre la rue. Échap ferme d’abord une fenêtre ouverte.</p><button class="primary" id="understood">C’est parti →</button>`);$('understood').onclick=close;}
 function placeHUD(){
+ syncServiceHUD();
+ if(personalBar){$('place-name').textContent='✦ MON BAR';$('exit-room').textContent='Aménager ↗';$('exit-room').hidden=false;$('quest').innerHTML='VOTRE ÉTABLISSEMENT<strong>'+personalBar.stats+'</strong>';canvas.setAttribute('aria-label','Votre bar. Déplacez-vous au joystick ou au clavier. Rejoignez la porte pour revenir au plan.');return;}
  // Interiors and exams keep the city's current musical phrase playing.
  window.HoublonAudio.setScene(state.area===2?'gothic':state.area===1?'night':'day');
  const inside=!!room;
  $('place-name').textContent=inside?'✦ '+interiors.names[interiors.slot(room.door)].toUpperCase():'✦ '+street.maps[state.area].name.toUpperCase();
  document.querySelector('.phone').classList.toggle('night-area',state.area>0);
- $('exit-room').hidden=!inside;
+ $('exit-room').textContent='Sortir ↗';$('exit-room').hidden=!inside;
  if(inside)$('quest').innerHTML='À L’INTÉRIEUR<strong>'+interiors.hints[interiors.slot(room.door)]+'</strong>';
  canvas.setAttribute('aria-label',inside?'Intérieur. Flèches pour marcher, E pour interagir. Rejoignez la sortie en bas pour retourner dans la rue.':'Rue du Houblon. Flèches pour marcher, E pour entrer.');
 }
@@ -97,6 +99,7 @@ function enterRoom(door){
  notify(door.type==='library'?'Bienvenue ! Avancez jusqu’au grand livre pour le consulter.':'Avancez vers le comptoir pour parler au patron.');
 }
 function leaveRoom(){
+ if(personalBar){openBarEditor();return;}
  if(!room)return;
  state.x=room.door.x;state.y=room.door.y;room=null;near=null;keys.clear();stick.reset();direction='down';
  if(!$('overlay').hidden)close();hud();save();canvas.focus();
@@ -104,7 +107,7 @@ function leaveRoom(){
 function changeArea(id){
  if(!street.maps[id]||!areaUnlocked(id)){notify('Réussissez les bars des quartiers précédents pour continuer.');return;}
  if(state.area===id){close();return;}
- room=null;state.area=id;street.select(id);buildings=street.doors;
+ personalBar=null;room=null;state.area=id;street.select(id);buildings=street.doors;
  [state.x,state.y]=street.maps[id].spawn;near=null;keys.clear();stick.reset();close();hud();save();
  notify('Bienvenue : '+street.maps[id].name);
 }
@@ -115,33 +118,55 @@ function areas(){
 $('areas').onclick=areas;
 function interact(){
  if(!$('overlay').hidden)return;
+ if(personalBar){if(personalBar.nearExit())openBarEditor();return;}
  if(room){const target=interiors.target(room);if(target==='exit')leaveRoom();else if(target==='host'){keys.clear();stick.reset();room.door.type==='library'?library():barIntro(room.door.index);}else notify('Avancez vers le livre ou le comptoir. La sortie se trouve en bas.');return;}
  if(!near){notify('Suivez les pavés jusqu’à une porte pour entrer.');return;}
  if(near.type==='travel'){changeArea(near.targetArea);return;}
  enterRoom(near);
 }
 $('exit-room').onclick=leaveRoom;
-$('my-bar').onclick=()=>{modal('VOTRE ÉTABLISSEMENT',window.HoublonBar.html());window.HoublonBar.mount({state,earned:xp,save});};
+function openBarEditor(){
+ personalBar=null;modal('VOTRE ÉTABLISSEMENT',window.HoublonBar.html());
+ window.HoublonBar.mount({state,earned:xp,save,onOpen:data=>{close();room=null;personalBar=window.HoublonBarWorld.create({data,state,save});step=0;keys.clear();stick.reset();hud();canvas.focus();notify('Votre bar est ouvert ! Promenez-vous et observez les clients.');}});hud();
+}
+$('my-bar').onclick=openBarEditor;
+let serviceUiSignature='';
+function syncServiceHUD(){
+ const root=$('bar-service'),service=personalBar?.service;root.hidden=!personalBar;
+ $('quest').hidden=!!service&&service.phase!=='idle';
+ if(!personalBar||!service){serviceUiSignature='';return;}
+ const active=service.phase!=='idle',q=service.summary,seconds=Math.ceil(service.remaining);
+ $('bar-service-timer').hidden=!active;$('bar-service-timer').textContent=String(Math.floor(seconds/60)).padStart(2,'0')+':'+String(seconds%60).padStart(2,'0');
+ $('bar-service-status').hidden=!active;$('bar-service-status').textContent=`${q.dollars} $ · Satisfaction ${q.satisfaction} % · ${q.served} servis`;
+ $('bar-service-start').hidden=service.phase==='running';$('bar-service-start').disabled=!personalBar.canControl;
+ $('bar-service-start').textContent=service.phase==='finished'?'Rejouer · 1 min 30':'Lancer le mini-jeu · 1 min 30';
+ $('bar-service-note').hidden=!active;$('bar-service-note').textContent=service.phase==='finished'?`Service terminé : +${q.earnings} $ · ${q.served} servis · ${q.lost} non servis · ${q.satisfaction} % de satisfaction`:service.message+(service.carrying?.kind==='beer'?' · '+(window.HoublonBar.beerOptions(state.completed).find(b=>b.id===service.carrying.beerId)?.name||'Bière')+' en main':service.carrying?.kind==='spare'?' · Fût neuf en main':'');
+ const actions=service.actions(),signature=JSON.stringify(actions);
+ if(signature!==serviceUiSignature){serviceUiSignature=signature;$('bar-service-actions').innerHTML=actions.map(a=>`<button data-service-action="${a.id}" ${a.disabled?'disabled':''}>${a.label}</button>`).join('');$('bar-service-actions').querySelectorAll('[data-service-action]').forEach(button=>button.onclick=()=>{personalBar?.service.act(button.dataset.serviceAction);syncServiceHUD();});}
+}
+$('bar-service-start').onclick=()=>{if(personalBar?.startService())window.HoublonAudio.sfx('click');else if(personalBar?.service.message)notify(personalBar.service.message);syncServiceHUD();};
+
 $('avatar-button').onclick=createCharacter;$('help').onclick=help;$('journal').onclick=journal;$('collection').onclick=collection;$('interact').onclick=interact;
 const mapping={ArrowUp:'up',ArrowDown:'down',ArrowLeft:'left',ArrowRight:'right',z:'up',w:'up',s:'down',q:'left',a:'left',d:'right'};
-window.addEventListener('keydown',e=>{if(!$('overlay').hidden){if(e.key==='Escape')close();if(e.key==='Tab'){const items=[...document.querySelectorAll('.sheet button,.sheet input')].filter(el=>!el.hidden&&!el.disabled&&el.getClientRects().length);const first=items[0],end=items.at(-1);if(e.shiftKey&&document.activeElement===first){e.preventDefault();end.focus();}else if(!e.shiftKey&&document.activeElement===end){e.preventDefault();first.focus();}}return;}if(e.key==='Escape'&&room){leaveRoom();return;}const key=mapping[e.key]||mapping[e.key.toLowerCase()];if(key){e.preventDefault();keys.add(key);}if(e.key.toLowerCase()==='e'&&!e.repeat)interact();});
-window.addEventListener('keyup',e=>keys.delete(mapping[e.key]||mapping[e.key.toLowerCase()]));window.addEventListener('blur',()=>{keys.clear();stick.reset();save();});document.addEventListener('visibilitychange',()=>{if(document.hidden){keys.clear();stick.reset();save();}});window.addEventListener('pagehide',save);
+window.addEventListener('keydown',e=>{if(!$('overlay').hidden){if(e.key==='Escape')close();if(e.key==='Tab'){const items=[...document.querySelectorAll('.sheet button,.sheet input')].filter(el=>!el.hidden&&!el.disabled&&el.getClientRects().length);const first=items[0],end=items.at(-1);if(e.shiftKey&&document.activeElement===first){e.preventDefault();end.focus();}else if(!e.shiftKey&&document.activeElement===end){e.preventDefault();first.focus();}}return;}if(e.key==='Escape'&&(room||personalBar)){leaveRoom();return;}const key=mapping[e.key]||mapping[e.key.toLowerCase()];if(key){e.preventDefault();keys.add(key);}if(e.key.toLowerCase()==='e'&&!e.repeat)interact();});
+window.addEventListener('keyup',e=>keys.delete(mapping[e.key]||mapping[e.key.toLowerCase()]));window.addEventListener('blur',()=>{keys.clear();stick.reset();save();});document.addEventListener('visibilitychange',()=>{last=0;if(document.hidden){keys.clear();stick.reset();save();}});window.addEventListener('pagehide',save);
 
 function rect(c,x,y,w,h,color){c.fillStyle=color;c.fillRect(Math.round(x),Math.round(y),w,h)}
-function person(c,x,y,p,walk,dir,height=44){characters.draw(c,x,y,p,walk,dir,height);}
-function draw(){if(room){interiors.paint(ctx,room,person,state,step,direction);return;}street.paint(ctx,cameraX,camera,state,near,unlocked);ctx.save();ctx.scale(view.streetZoom,view.streetZoom);ctx.translate(-cameraX,-camera);person(ctx,state.x,state.y,state,step,direction);ctx.restore();}
+function person(c,x,y,p,walk,dir,height=44,pose){characters.draw(c,x,y,p,walk,dir,height,pose);}
+function draw(){if(personalBar){personalBar.paint(ctx,view,person,step,direction);return;}if(room){interiors.paint(ctx,room,person,state,step,direction);return;}street.paint(ctx,cameraX,camera,state,near,unlocked);ctx.save();ctx.scale(view.streetZoom,view.streetZoom);ctx.translate(-cameraX,-camera);person(ctx,state.x,state.y,state,step,direction);ctx.restore();}
 let direction='down';function blocked(x,y){return !street.canWalk(x,y);}
 if(blocked(state.x,state.y)){[state.x,state.y]=street.maps[state.area].spawn;}
 function frame(now){
- const dt=Math.min((now-last)/1000,.04);last=now;
+ const elapsed=last?Math.max(0,(now-last)/1000):0,dt=Math.min(elapsed,.04);last=now;
  let dx=0,dy=0;
  if($('overlay').hidden){
+  if(personalBar)personalBar.update(dt,elapsed);
   dx=(keys.has('right')?1:0)-(keys.has('left')?1:0);dy=(keys.has('down')?1:0)-(keys.has('up')?1:0);
   if(!dx&&!dy){dx=stick.vector.x;dy=stick.vector.y;}
   const magnitude=Math.hypot(dx,dy);if(magnitude>1){dx/=magnitude;dy/=magnitude;}
   if(dx||dy){
-   const speed=view.moveSpeed*dt,actor=room||state;
-   const canMove=room?(x,y)=>interiors.canWalk(x,y,room):street.canWalk;
+   const speed=view.moveSpeed*dt,actor=personalBar?personalBar.player:room||state;
+   const canMove=personalBar?personalBar.canWalk:room?(x,y)=>interiors.canWalk(x,y,room):street.canWalk;
    const oldX=actor.x,oldY=actor.y,nx=actor.x+dx*speed,ny=actor.y+dy*speed;
    if(canMove(nx,actor.y))actor.x=nx;
    if(canMove(actor.x,ny))actor.y=ny;
@@ -151,7 +176,7 @@ function frame(now){
   }else step=0;
  }
  let label,available=false;
- if(room){
+ if(personalBar){available=personalBar.nearExit();label='Fermer et aménager →';const info='VOTRE ÉTABLISSEMENT<strong>'+personalBar.stats+'</strong>';if($('quest').innerHTML!==info)$('quest').innerHTML=info;}else if(room){
   const target=interiors.target(room);available=!!target;
   label=target==='exit'?'Sortir dans la rue →':target==='host'?(room.door.type==='library'?'Consulter le grand livre →':'Parler au patron →'):'Explorez · Rejoignez le livre ou le comptoir';
  }else{
@@ -160,6 +185,7 @@ function frame(now){
   label=near?(near.type==='travel'?(areaUnlocked(near.targetArea)?street.maps[near.targetArea].name+' →':'🔒 Terminez les quartiers précédents'):near.type==='library'?'Entrer dans la bibliothèque →':unlocked(near.index)?`Entrer : ${content.bars[near.index].name} →`:'🔒 Réussissez le bar précédent'):'Approchez-vous d’une porte';
  }
  if($('interact').textContent!==label)$('interact').textContent=label;
+ syncServiceHUD();
  $('interact').hidden=!available;$('interact').disabled=!available;draw();if(draft&&!$('overlay').hidden)paintPreview();requestAnimationFrame(frame);
 }
 window.addEventListener('characters-ready',hud);hud();requestAnimationFrame(frame);if(!state.created)createCharacter();

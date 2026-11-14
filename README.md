@@ -16,7 +16,7 @@ Après les huit premiers bars, **Quartiers** donne accès au quartier gothique. 
 
 Le décor conserve les formes simples et les couleurs mates du jeu. Quatre nouveaux intérieurs et quatre portraits gothiques (six poses chacun) accompagnent les examens. Des petits feux, halos lumineux et reflets animent les entrées ; les cheminées restent animées. Les effets respectent la préférence système de réduction des animations.
 
-Les ressources sont `assets/gothic-map.png`, `assets/gothic-interiors.png` et les quatre atlas `assets/gothic-*.png`. Les leçons sont dans `content-gothic.js` avec leurs liens vers les ressources du BJCP. La progression existante est conservée.
+Les ressources sont `assets/gothic-map-texturee.png`, `assets/gothic-interiors.png` et les quatre atlas `assets/gothic-*.png`. Les leçons sont dans `content-gothic.js` avec leurs liens vers les ressources du BJCP. La progression existante est conservée.
 
 # La rue du Houblon — prototype 0.6
 
@@ -89,13 +89,13 @@ Le parcours actuel contient douze fiches et quarante-huit questions originales s
 
 Le troisième bouton de la navigation ouvre une pièce vide de 15 × 12 cases (une case = un mètre). Le catalogue d’équipement est un carrousel horizontal placé au-dessus du plan. Les cases du plan sont agrandies, et celui-ci se fait défiler horizontalement en le faisant glisser sur téléphone tant qu’aucun élément n’est sélectionné. Choisir un équipement puis toucher le plan pour l’acheter et le placer. Toucher un élément posé permet de le déplacer, le pivoter puis confirmer sa position, ou le revendre au prix d’achat. Le plan et les achats sont enregistrés avec la progression. Au clavier, les flèches déplacent le curseur du plan et Entrée permet de placer/sélectionner.
 
-Le budget est constitué des XP gagnés dans les examens moins le coût des équipements possédés. Le niveau et le total historique d’XP restent inchangés. Le premier aménagement complet coûte 540 XP : comptoir, tireuse, fût, entrée, toilettes, table de deux places, tonneau de deux places et Alex, le premier barman. Les tables existent en deux, quatre ou six places ; les tonneaux avec tabourets en deux ou quatre places.
+Le budget est constitué des XP gagnés dans les examens moins le coût des équipements possédés. Le niveau et le total historique d’XP restent inchangés. Le premier aménagement complet coûte 680 XP : comptoir, tireuse, fût, entrée, toilettes, table de deux places, tonneau de deux places et Alex, le premier barman. Les tables existent en deux, quatre ou six places ; les tonneaux avec tabourets en deux ou quatre places.
 
-Pour ouvrir, il faut au moins un équipement de chaque catégorie. Chaque tireuse doit se trouver à trois mètres maximum du centre d’un fût, et les équipements doivent rester accessibles depuis l’entrée. Les tireuses sont reliées au fût le plus proche par un trait indiquant la distance. L’entrée se place sur un bord de la pièce. Une seule entrée et un seul barman sont disponibles dans ce prototype.
+Pour ouvrir, il faut au moins un équipement de chaque catégorie. Une tireuse doit être entièrement posée sur un comptoir. Déplacez ou revendez ses tireuses avant de déplacer, pivoter ou revendre le comptoir. Les anciennes tireuses posées au sol restent dans la sauvegarde et doivent être replacées sur un comptoir avant l’ouverture. Chaque tireuse doit se trouver à trois mètres maximum du centre d’un fût, et les équipements doivent rester accessibles depuis l’entrée. Les tireuses sont reliées au fût le plus proche par un trait indiquant la distance. L’entrée se place sur un bord de la pièce. Les toilettes sont un module avec murs et porte : la case signalée par la flèche doit rester accessible. La rotation déplace aussi cette porte. Une seule entrée et un seul barman sont disponibles dans ce prototype.
 
-Une fois ouvert, jusqu’à six clients entrent, commandent au comptoir, prennent une place disponible puis repartent. Les ventes sont comptabilisées, sans revenu supplémentaire en XP ni gestion des stocks pour le moment. Fermer le bar, quitter son menu ou mettre la page en arrière-plan interrompt la simulation ; les achats et les ventes déjà enregistrées sont conservés. Il n’y a pas de progression hors ligne.
+Ouvrir le bar ferme l’éditeur et lance une pièce jouable construite à partir des placements enregistrés. Le sol est un parquet dessiné avec une texture discrète. Les onze équipements possèdent chacun une image PNG transparente, visible dans le catalogue, sur le plan et dans la visite. Le joystick et le clavier permettent de se promener avec une caméra qui suit le personnage et des collisions contre les meubles et les murs des toilettes. Jusqu’à douze clients entrent. Une file se forme sur le chemin du comptoir : chacun attend son tour et une place libre avant de commander. Les clients assis sont dessinés au-dessus des chaises, jambes pliées et tournés vers la table, y compris après rotation du mobilier. Ils lèvent leur chope pour boire et restent assis pendant une durée tirée au hasard entre 0 et 15 secondes, puis utilisent parfois les toilettes et repartent. Le compteur affiche aussi les clients en attente. Le geste répété est désactivé si le système demande de réduire les animations. Les ventes sont comptabilisées, sans revenu supplémentaire en XP ni gestion des stocks pour le moment. Le bouton Aménager, la porte ou Échap ramènent à l’éditeur. Un menu ouvert ou la page en arrière-plan met la simulation en pause. Revenir à l’éditeur ferme le service ; les clients seront recréés à la prochaine ouverture. Cela interrompt la simulation ; les achats et les ventes déjà enregistrées sont conservés. Il n’y a pas de progression hors ligne.
 
-Code : `bar-builder.js`. Vérifications : `node --test bar-builder.test.cjs portraits.test.cjs` (achats, déplacement, revente, sauvegarde, distance des tireuses, accès et service des clients).
+Code : `bar-builder.js`, `bar-world.js`, `bar-assets.js`. Ressources : `assets/bar-items/`. Vérifications : `node --test bar-builder.test.cjs portraits.test.cjs` (achats, déplacement, revente, sauvegarde, distance des tireuses, accès et service des clients).
 
 - `index.html` : interface en français au format portrait.
 - `style.css` : présentation ordinateur et mise en page adaptable.
@@ -103,3 +103,43 @@ Code : `bar-builder.js`. Vérifications : `node --test bar-builder.test.cjs port
 - `content.js` : bibliothèque, bars, questions et collection.
 
 Le prototype est une application web locale destinée à être lancée sur ordinateur. La logique et le contenu sont séparés du rendu. Les commandes par pointeur et la mise en page portrait préparent une future adaptation mobile. Il n'y a pas encore de paquet Android/iOS, de synchronisation entre appareils, de compte ou de publication en ligne.
+
+Les deux quartiers nocturnes utilisent désormais des décors avec textures mates légères et ombres douces : `assets/place-lanternes-texturee.png` et `assets/gothic-map-texturee.png`. Les originaux sont conservés ; voir `assets/textures-nocturnes.md`.
+
+### Murs, poteaux et tableaux
+
+Le pourtour de la salle est habillé de bois. Le catalogue propose aussi des segments de mur (30 XP) et des poteaux (40 XP) de 1 × 1 case. Ils bloquent les déplacements : gardez les accès au comptoir, aux sièges et à la porte des toilettes dégagés.
+
+Dans le carrousel, **Tableaux** ouvre une liste verticale de dix créations originales de marques de bière fictives (25 XP chacune) : Cerisier, Brume du Verger, Pavés Dorés, Ambrée des Amis, Houblon Vagabond, Nuit de Velours, Rousse du Coin, Triple Rencontre, Saison des Fleurs et Zéro Détour. Choisissez un tableau puis touchez une case du mur extérieur, un mur installé ou un poteau. Un tableau ne peut être posé sur le sol ou un autre meuble, ni superposé à un autre tableau. Décrochez-le avant de déplacer ou de revendre son support.
+
+Les tableaux sont affichés au-dessus de leur support dans l’éditeur et dans la visite ; ils sont plus petits sur les poteaux. Tous ces achats suivent la sauvegarde et le remboursement en XP habituels.
+
+### Station murale et raccordement des fûts
+
+La station de tirage à une voie coûte 80 XP et se fixe uniquement sur un mur (extérieur ou segment installé), jamais au sol ou sur un poteau. Son image est `assets/bar-items/station.png`.
+
+Pour relier un fût : touchez le fût, choisissez **Raccorder**, puis touchez une station. Le fût et sa station doivent être collés par un côté : les diagonales et les cases séparées ne sont pas acceptées. Le tuyau apparaît dans l’éditeur et dans la visite. **Débrancher** retire le lien. Les raccordements sont sauvegardés avec le plan. Séparer un fût de sa station rend le lien invalide et le tuyau rouge ; l’ouverture reste bloquée jusqu’à correction. Revendre une station débranche les fûts qui y étaient reliés.
+
+Tous les fûts doivent être raccordés avant l’ouverture. La règle existante des tireuses sur comptoir, à trois mètres maximum d’un fût, s’applique aussi. Les anciennes sauvegardes conservent leurs fûts ; il faut acheter une station et les raccorder avant de rouvrir. Le premier aménagement complet coûte désormais 620 XP.
+
+### Bières débloquées et tireuses
+
+Chaque bar réussi débloque son type de fût (le thème du bar : pils, blanche, IPA, etc.). Ces déblocages sont calculés depuis la progression existante : les bars déjà réussis comptent aussi, sans rejouer les examens. Il s’agit des types disponibles pour les fûts achetés dans l’éditeur.
+
+Touchez une tireuse dans le plan : son panneau permet de choisir une bière parmi les types débloqués, pour chaque fût raccordé à une station et situé à 3 m maximum. Le fût conserve son type et la tireuse conserve le fût qu’elle dessert. Plusieurs tireuses reliées au même fût servent la même bière. Le choix est sauvegardé. Les fûts anciens sans type reçoivent la première bière débloquée ; les choix déjà enregistrés sont conservés.
+
+Un type encore verrouillé ou un raccordement de tireuse devenu invalide bloque l’ouverture. En visite, le nom du type servi apparaît dans une petite étiquette sous la tireuse la plus proche, à courte distance. Les clients reçoivent une des bières proposées par les tireuses actives.
+
+### Mini-jeu de service — 90 secondes
+
+À l’ouverture, une caméra remonte depuis l’entrée jusqu’au comptoir en 1,8 seconde. Le personnage arrive près du bar à la fin de cette présentation. La préférence de réduction des animations supprime ce mouvement. Alex utilise désormais le même dessin animé que les clients ; le tirage ajoute un mouvement du bras au personnage qui utilise la pompe.
+
+Le bouton **Lancer le mini-jeu · 1 min 30** démarre un service manuel. Le chronomètre vert est encadré de blanc, avec des chiffres également entourés de blanc. Une bulle indique la commande de chaque client : seuls les types réellement proposés aux tireuses sont demandés. Approchez-vous d’une tireuse et touchez le nom de la bonne bière ; après 1,2 seconde de tirage, portez le verre au premier client de la file et choisissez **Servir le client**. Une mauvaise bière n’est pas livrée. Les clients servis repartent avec leur verre.
+
+La satisfaction dépend du temps écoulé depuis l’arrivée : servir rapidement rapporte davantage de dollars (de 3 à 10 par client). Après 30 secondes sans service, un client repart mécontent. La moyenne du service inclut les clients non servis. À 90 secondes, le service se termine, les commandes restantes comptent comme non servies, et le bilan affiche recettes, clients servis et satisfaction. Les dollars déjà gagnés sont sauvegardés dans le bar, indépendamment des XP. Une nouvelle partie ne réattribue pas les gains précédents.
+
+Le **Stock de fûts** coûte 60 XP, occupe une case et doit être accessible : il est obligatoire pour ouvrir. Pendant le mini-jeu, chaque fût contient huit portions. Chaque verre tiré consomme une portion, même s’il est ensuite vidé. Quand le fût est vide, rejoignez le stock, choisissez **Prendre un fût neuf**, allez près du fût vide puis **Changer le fût vide** (1,8 seconde). On ne peut porter qu’un verre ou un fût neuf à la fois. Pour ce premier prototype, le stock fournit des remplacements sans limite ni coût supplémentaire. Les niveaux des fûts sont conservés entre les parties.
+
+Un menu ouvert ou une page mise en arrière-plan met le service en pause. Revenir à l’éditeur l’interrompt ; les dollars et portions déjà enregistrés restent conservés. Hors mini-jeu, les clients autonomes restent une animation de visite et ne consomment pas les portions du service manuel.
+
+Contrôleur : `bar-service.js`. Tests : `node --test bar-service.test.cjs bar-builder.test.cjs portraits.test.cjs`.

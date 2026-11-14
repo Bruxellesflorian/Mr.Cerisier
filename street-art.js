@@ -22,8 +22,8 @@ window.HoublonStreet = (() => {
     [155,634,503,705],
     [265,630,389,715]
   ];
-  const nightImage=new Image();nightImage.src='assets/place-lanternes.png';
-  const dayImage=image;const gothicImage=new Image();gothicImage.src='assets/gothic-map.png';
+  const nightImage=new Image();nightImage.src='assets/place-lanternes-texturee.png';
+  const dayImage=image;const gothicImage=new Image();gothicImage.src='assets/gothic-map-texturee.png';
   dayDoors.push({x:358,y:680,type:'travel',targetArea:1,label:'PLACE DES LANTERNES'});
   const maps=[
    {name:'Quartier des Brasseurs',image:dayImage,doors:dayDoors,paths:dayPaths,spawn:[358,680],chimneys:[[292,12],[615,69],[109,219],[633,301],[282,444]]},
@@ -58,6 +58,7 @@ window.HoublonStreet = (() => {
     if(current===2)window.HoublonAtmosphere.gothicLights(ctx);
     else if(current===1)window.HoublonAtmosphere.nightLights(ctx);
     else window.HoublonAtmosphere.dayWind(ctx,image);
+    if(current>0)window.HoublonAtmosphere.mapLeaves(ctx,current);
     maps[current].chimneys.forEach(([x,y],i)=>window.HoublonAtmosphere.chimney(ctx,x,y,i*1.7));
     for(const door of doors) {
       const completed=door.type==='bar'&&state.completed.includes(door.index);

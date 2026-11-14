@@ -95,6 +95,27 @@ window.HoublonAtmosphere = (() => {
   const airLeaves=Array.from({length:84},()=>({offset:randomLeaf(),duration:7+randomLeaf()*6,
     x:(randomLeaf()-.5)*32,y:(randomLeaf()-.5)*24,drift:40+randomLeaf()*65,phase:randomLeaf()*6.28}));
   const wrap=(n,size)=>((n%size)+size)%size;
+  const leafMapZones=[null,
+    [[325,15,378,300],[325,365,378,720],[36,228,687,258],[22,248,52,600],[670,248,695,600],[40,573,683,615],[108,610,610,714]],
+    [[340,240,390,728],[178,210,211,255],[180,239,532,263],[512,218,540,257],[166,444,198,475],[178,450,575,478],[552,469,584,480],[141,642,173,671],[151,655,365,680]]
+  ];
+  const nightLeafFields=leafMapZones.slice(1).map((zones,i)=>Array.from({length:125},(_,n)=>({
+    zone:zones[n%zones.length],u:randomLeaf(),v:randomLeaf(),speed:3+randomLeaf()*9,drift:(randomLeaf()-.5)*4,
+    phase:randomLeaf()*Math.PI*2,turn:.5+randomLeaf()*1.2,radius:1+randomLeaf()*1.1,lift:randomLeaf()*3,
+    color:(i===0?['#c1ae72','#89917d','#b8a278']:['#d1a45e','#ba8b91','#9b91ad'])[Math.floor(randomLeaf()*3)]
+  })));
+  function paintLeaves(c,leaves,t,opacityScale=.8){
+    leaves.forEach(leaf=>{
+      const [left,top,right,bottom]=leaf.zone,w=right-left,h=bottom-top;
+      const u=wrap(leaf.u*w+t*leaf.speed+Math.sin(t*leaf.turn+leaf.phase)*5,w);
+      const v=wrap(leaf.v*h+t*leaf.drift+Math.sin(t*.7+leaf.phase)*4,h),x=left+u,flutter=Math.sin(t*leaf.turn*2+leaf.phase);
+      const lift=Math.max(0,Math.sin(t*1.6+leaf.phase))*leaf.lift;
+      const opacity=Math.min(1,u/6,(w-u)/6,v/4,(h-v)/4)*opacityScale;
+      c.globalAlpha=opacity*.18;c.fillStyle='#302b2b';c.beginPath();c.ellipse(x+.6,v+top+.8,leaf.radius,.65,0,0,Math.PI*2);c.fill();
+      c.globalAlpha=opacity;c.fillStyle=leaf.color;c.beginPath();c.ellipse(x,top+v-lift,leaf.radius,.55+Math.abs(flutter)*.4,leaf.phase+t*leaf.turn+flutter*.3,0,Math.PI*2);c.fill();
+    });
+  }
+  function mapLeaves(c,map){if(reduced?.matches||!nightLeafFields[map-1])return;c.save();paintLeaves(c,nightLeafFields[map-1],time(),.68);c.restore();}
   function dayWind(c,image) {
     if(reduced?.matches)return;
     const t=time();c.save();
@@ -116,22 +137,7 @@ window.HoublonAtmosphere = (() => {
           1.7,.55+Math.abs(flutter)*.35,age*5+i,0,Math.PI*2);c.fill();
       }
     });
-    groundLeaves.forEach(leaf=>{
-      const [left,top,right,bottom]=leaf.zone,w=right-left,h=bottom-top;
-      const wind=t-.8*Math.sin(t*.8+leaf.phase)/.8;
-      const u=wrap(leaf.u*w+wind*leaf.speed+Math.sin(t*leaf.turn+leaf.phase)*5,w);
-      const v=wrap(leaf.v*h+t*leaf.drift+Math.sin(t*.7+leaf.phase)*4,h);
-      const x=left+u,ground=top+v;
-      const flutter=Math.sin(t*leaf.turn*2+leaf.phase);
-      const lift=Math.max(0,Math.sin(t*1.6+leaf.phase))*leaf.lift;
-      // Fade at each boundary so wrapping never appears as a teleport.
-      const opacity=Math.min(1,u/6,(w-u)/6,v/4,(h-v)/4)*.8;
-      c.globalAlpha=opacity*.18;c.fillStyle='#544735';
-      c.beginPath();c.ellipse(x+.6,ground+.8,leaf.radius,.65,0,0,Math.PI*2);c.fill();
-      c.globalAlpha=opacity;c.fillStyle=leaf.color;
-      c.beginPath();c.ellipse(x,ground-lift,leaf.radius,.55+Math.abs(flutter)*.4,
-        leaf.phase+t*leaf.turn+flutter*.3,0,Math.PI*2);c.fill();
-    });
+    paintLeaves(c,groundLeaves,t);
 
     c.restore();
   }
@@ -144,5 +150,5 @@ window.HoublonAtmosphere = (() => {
       c.fillStyle='#f5c98b';c.globalAlpha=.15;for(let j=0;j<3;j++)c.fillRect(x-10+j*2,y+6+j*4,20-j*4,1);c.restore();
     });c.restore();
   }
-  return {chimney,fire,glow,time,nightLights,dayWind,gothicLights};
+  return {chimney,fire,glow,time,nightLights,dayWind,gothicLights,mapLeaves};
 })();
