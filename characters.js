@@ -1,76 +1,92 @@
-/* Embedded atlas keeps local-file canvas recolouring available without a server. */
-window.HoublonCharacters = (() => {
+/* Continuous articulated characters: no generated sprite sheets. */
+window.HoublonCharacters=(()=>{
  const palettes={
   skin:['#efc099','#c58c63','#946548','#624433','#d9a47b','#754d3d'],
   hair:['#553d32','#b67a37','#d6bc77','#343a39','#813c37','#b6ada1'],
   shirt:['#a86043','#527e91','#886593','#56754e','#b39355','#455263']
  };
  const names={skin:['Pêche','Doré','Ambré','Ébène','Miel','Acajou'],hair:['Châtain','Cuivré','Blond','Noir','Auburn','Argent'],shirt:['Terracotta','Bleu pétrole','Prune','Sauge','Ocre','Ardoise']};
- const atlas=new Image(),frames=new Map(),cache=new Map(),cells=new Map();let ready=false,failed=false;
- const rgb=hex=>[1,3,5].map(i=>parseInt(hex.slice(i,i+2),16));
- atlas.onload=()=>{ready=true;window.dispatchEvent(new Event('characters-ready'));};
- atlas.onerror=()=>{failed=true;};atlas.src=window.HOUBLON_SPRITES_DATA;
- function cell(gender,row,frame){
-  const key=[gender,row,frame].join(':');if(cells.has(key))return cells.get(key);
-  const w=atlas.naturalWidth/8,h=atlas.naturalHeight/4,col=(gender==='girl'?4:0)+frame;
-  const sx=Math.round(col*w),sy=Math.round(row*h),sw=Math.round((col+1)*w)-sx,sh=Math.round((row+1)*h)-sy;
-  const source=document.createElement('canvas');source.width=sw;source.height=sh;
-  const sc=source.getContext('2d',{willReadFrequently:true});sc.drawImage(atlas,sx,sy,sw,sh,0,0,sw,sh);
-  const pixels=sc.getImageData(0,0,source.width,source.height).data;
-  let l=source.width,r=0,t=source.height,b=0;
-  for(let y=0;y<source.height;y++){
-   let count=0,left=source.width,right=0;
-   for(let x=0;x<source.width;x++)if(pixels[(y*source.width+x)*4+3]>140){count++;left=Math.min(left,x);right=Math.max(right,x);}
-   // Ignore isolated atlas-edge specks that otherwise change a pose's size.
-   if(count>=6){l=Math.min(l,left);r=Math.max(r,right);t=Math.min(t,y);b=Math.max(b,y);}
-  }
-  // Align using the head, not swinging arms or the extended boot.
-  let headLeft=source.width,headRight=0;
-  for(let y=t;y<=t+(b-t)*.3;y++)for(let x=l;x<=r;x++)if(pixels[(y*source.width+x)*4+3]>140){headLeft=Math.min(headLeft,x);headRight=Math.max(headRight,x);}
-  const result={source,l,r,t,b,head:(headLeft+headRight)/2,h};cells.set(key,result);return result;
- }
- function base(gender,row,frame){
-  const key=[gender,row,frame].join(':');if(frames.has(key))return frames.get(key);
-  const {source,l,r,t,b,head,h}=cell(gender,row,frame),idle=cell(gender,row,1);
-  // Keep the source cell resolution instead of shrinking every pose to 64 × 96.
-  const out=document.createElement('canvas');out.height=Math.ceil(h);out.width=Math.ceil(out.height*2/3);
-  const c=out.getContext('2d',{willReadFrequently:true});c.imageSmoothingEnabled=true;c.imageSmoothingQuality='high';
-  // One scale for the whole directional cycle prevents the body from pulsing.
-  const scale=out.height*92/96/(idle.b-idle.t+1);
-  const idleCentre=(idle.l+idle.r)/2;
-  const left=out.width/2+(l-head+idle.head-idleCentre)*scale;
-  c.drawImage(source,l,t,r-l+1,b-t+1,left,out.height*2/96,(r-l+1)*scale,(b-t+1)*scale);
-  const data=c.getImageData(0,0,out.width,out.height);frames.set(key,data);return data;
- }
- function tinted(p,row,frame){
-  const key=[p.gender,p.skin,p.hair,p.shirt,row,frame].join(':');if(cache.has(key))return cache.get(key);
-  const src=base(p.gender,row,frame),out=document.createElement('canvas');out.width=src.width;out.height=src.height;
-  const c=out.getContext('2d'),data=c.createImageData(src.width,src.height);data.data.set(src.data);
-  const colors={skin:rgb(palettes.skin[p.skin]||palettes.skin[0]),hair:rgb(palettes.hair[p.hair]||palettes.hair[0]),shirt:rgb(palettes.shirt[p.shirt]||palettes.shirt[0])};
-  for(let i=0;i<data.data.length;i+=4){
-   const d=data.data;if(!d[i+3])continue;const r=d[i],g=d[i+1],b=d[i+2],y=Math.floor(i/4/src.width)/src.height;
-   const max=Math.max(r,g,b),min=Math.min(r,g,b),delta=max-min;
-   const hue=delta===0?0:((max===r?(g-b)/delta:max===g?(b-r)/delta+2:(r-g)/delta+4)*60+360)%360;
-   if(d[i+3]<8){d[i+3]=0;continue;}
-   let kind=null;
-   const saturation=max?delta/max:0;
-   if(y<.43&&max>65&&max<190&&g<130&&r>g*1.08&&hue>8&&hue<52)kind='hair';
-   if(y<.78&&r>180&&g>130&&hue>14&&hue<48&&saturation>.18&&saturation<.65)kind='skin';
-   if(y>.35&&y<.78&&((p.gender==='girl'&&hue>=34&&hue<63&&saturation>.35&&g>105)||(p.gender!=='girl'&&hue>=65&&hue<165&&saturation>.12)))kind='shirt';
-   if(kind){const lum=(r*.3+g*.59+b*.11),ref=kind==='hair'?(p.gender==='girl'?115:72):kind==='skin'?183:(p.gender==='girl'?177:75),shade=Math.max(.45,Math.min(1.2,lum/ref));const color=colors[kind];for(let k=0;k<3;k++)d[i+k]=Math.min(255,color[k]*shade);}
 
-  }
-  c.putImageData(data,0,0);if(cache.size>=128)cache.clear();cache.set(key,out);return out;
+ const TAU=Math.PI*2;
+ const motion=new WeakMap();
+ const mix=(a,b,t)=>a+(b-a)*t;
+ function gait(phase){
+  const p=((phase%1)+1)%1;
+  if(p<.6)return {reach:13-26*p/.6,lift:0};
+  const t=(p-.6)/.4,s=t*t*(3-2*t);
+  return {reach:mix(-13,13,s),lift:8*Math.sin(Math.PI*t)};
  }
  function draw(c,x,y,p,walk,dir,height=44){
-  c.save();c.imageSmoothingEnabled=true;c.imageSmoothingQuality='high';
-  c.fillStyle='#293f3830';c.beginPath();c.ellipse(Math.round(x),Math.round(y),height*.17,height*.045,0,0,Math.PI*2);c.fill();
-  if(ready){const row={down:0,left:1,right:2,up:3}[dir]||0,frame=walk?Math.floor(walk/8)%4:1;
-   const image=tinted(p,row,frame);
-   // Subpixel placement follows the camera smoothly, without blurring between poses.
-   c.drawImage(image,x-height/3,y-height,height*2/3,height);
-  }else{c.fillStyle='#d8b584';c.textAlign='center';c.font='9px sans-serif';c.fillText(failed?'!':'…',x,y-12);}
+  let actors=motion.get(c);if(!actors){actors=new WeakMap();motion.set(c,actors);}
+  const now=performance.now()/1000,previous=actors.get(p)||{time:now,amount:0,phase:0,walk:0};
+  const dt=Math.min(.05,Math.max(0,now-previous.time)),target=walk>0?1:0;
+  const amount=previous.amount+(target-previous.amount)*(1-Math.exp(-dt*18));
+  const phase=walk>0?previous.phase+Math.max(0,walk-previous.walk)/64:previous.phase;
+  actors.set(p,{time:now,amount,phase,walk});
+  const side=dir==='left'||dir==='right',back=dir==='up',moving=amount>.001,female=p.gender==='girl';
+  const bob=Math.cos(phase*TAU*2)*.8*amount;
+  const skin=palettes.skin[p.skin]||palettes.skin[0],hair=palettes.hair[p.hair]||palettes.hair[0],coat=palettes.shirt[p.shirt]||palettes.shirt[0];
+  c.save();c.translate(x,y);c.scale(height/100,height/100);if(dir==='left')c.scale(-1,1);
+  c.lineCap='round';c.lineJoin='round';
+  function oval(px,py,rx,ry,color){c.fillStyle=color;c.beginPath();c.ellipse(px,py,rx,ry,0,0,TAU);c.fill();}
+  function line(ax,ay,bx,by,width,color){c.strokeStyle=color;c.lineWidth=width;c.beginPath();c.moveTo(ax,ay);c.lineTo(bx,by);c.stroke();}
+  function box(px,py,w,h,r,color){c.fillStyle=color;c.beginPath();c.roundRect(px,py,w,h,r);c.fill();}
+  function joint(ax,ay,bx,by,length,bend){
+   const dx=bx-ax,dy=by-ay,d=Math.max(.001,Math.hypot(dx,dy)),offset=Math.sqrt(Math.max(0,length*length-d*d/4));
+   return [(ax+bx)/2+dy/d*offset*bend,(ay+by)/2-dx/d*offset*bend];
+  }
+  const legs=[0,.5].map((offset,i)=>{
+   const raw=gait(phase+offset),g={reach:raw.reach*amount,lift:raw.lift*amount};
+   return {i,g,hipX:side?0:(i?6:-6),footX:side?g.reach:(i?6:-6),footY:-3-g.lift+(side?0:g.reach*(back?-.22:.22))};
+  });
+  oval(0,0,16,4,'#16231e30');
+  function leg(l,far){
+   // Front/back foreshortening stays vertical; knees only bend sideways in profile.
+   const hx=l.hipX,hy=-32+bob,k=side?joint(hx,hy,l.footX,l.footY,18,1):[hx,(hy+l.footY)/2];
+   const color=far?'#50483e':'#6a6050';
+   line(hx,hy,k[0],k[1],9,color);line(k[0],k[1],l.footX,l.footY-2,8,color);
+   box(l.footX-4,l.footY-5,side?13:9,6,3,far?'#342e29':'#453b30');
+  }
+  function arm(i,far){
+   const swing=moving?Math.sin((phase+i*.5)*TAU)*10*amount:0;
+   const ax=side?0:(i?13:-13),ay=-58+bob;
+   const handX=side?-swing+2:ax+(i?1:-1)*2,handY=-34+bob+(side?0:swing*.25);
+   const k=joint(ax,ay,handX,handY,14,side?-1:(i?1:-1));
+   line(ax,ay,k[0],k[1],8,coat);line(k[0],k[1],handX,handY-2,7,coat);oval(handX,handY,3.8,4.5,skin);
+   if(far){c.fillStyle='#17251d20';c.beginPath();c.ellipse(handX,handY,3.8,4.5,0,0,TAU);c.fill();}
+  }
+  // Rear limbs, torso, front limbs: stable depth order keeps joints readable.
+  if(side)arm(1,true);
+  leg(legs[1],true);leg(legs[0],false);
+  box(side?-9:-14,-64+bob,side?20:28,34,8,coat);
+  if(!back){box(side?7:-3,-61+bob,side?3:6,28,1,'#eee2c5');line(side?8:0,-55+bob,side?8:0,-33+bob,1,'#c5b895');}
+  if(female){
+   // Clothing and hair are decorative: both characters share every joint and gait value.
+   box(side?-8:-12,-65+bob,side?18:24,5,2,'#d8c7a4');
+   if(!back){box(side?6:6,-62+bob,4,10,2,'#e7d8b9');oval(side?4:4,-46+bob,1,1,'#d5b779');}
+  }
+  if(!side)arm(1,true);
+  if(back)line(-10,-61+bob,10,-33+bob,4,'#a7784b');else line(side?7:10,-62+bob,side?-6:-11,-34+bob,4,'#a7784b');
+  const bagX=side?-10:(back?6:-16),bagY=-39+bob+(moving?Math.sin(phase*TAU-.4)*.7:0);
+  box(bagX,bagY,12,13,4,'#93623e');box(bagX,bagY,12,5,3,'#ad7b4d');oval(bagX+6,bagY+6,1,1,'#d5b779');
+  arm(0,false);
+  const headY=-78+bob*.65;
+  if(female){
+   oval(side?-15:12,headY+4,8,15,hair);
+   oval(side?-16:12,headY-10,7,8,hair);
+   box(side?-20:9,headY-6,7,4,2,coat);
+  }
+  oval(side?1:0,headY,side?13:16,17,skin);
+  oval(side?-10:-15,headY+2,3,4,skin);if(!side)oval(15,headY+2,3,4,skin);
+  if(back){oval(0,headY-2,16,17,hair);oval(-8,headY+10,6,4,hair);oval(8,headY+10,6,4,hair);}
+  else{
+   c.fillStyle=hair;c.beginPath();c.moveTo(-15,headY+1);c.bezierCurveTo(-20,headY-24,18,headY-26,16,headY-5);c.lineTo(10,headY-10);c.quadraticCurveTo(0,headY-1,-6,headY-6);c.lineTo(-11,headY+1);c.fill();
+   if(female){oval(-13,headY+3,3,8,hair);if(!side)oval(13,headY+2,3,7,hair);}
+   if(side){oval(11,headY,1.4,2,'#302c29');oval(14,headY+5,3,2,skin);line(10,headY+10,13,headY+9,1,'#875a43');}
+   else{oval(-6,headY+1,1.5,2,'#302c29');oval(6,headY+1,1.5,2,'#302c29');c.strokeStyle='#875a43';c.lineWidth=1;c.beginPath();c.arc(0,headY+6,4,.2,Math.PI-.2);c.stroke();}
+  }
+  if(female&&back){oval(0,headY+7,8,12,hair);box(-4,headY-1,8,4,2,coat);}
   c.restore();
  }
- return {draw,palettes,names,get ready(){return ready;}};
+ return {draw,palettes,names,ready:true,gait};
 })();

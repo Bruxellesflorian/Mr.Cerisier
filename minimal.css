@@ -18,3 +18,49 @@ body{background:#eee8d8;background-image:none;color:var(--ink)}
 .card,.book,.beer-card{background:#ecefdc;border-color:#ccd5b8;border-radius:12px}.book{color:#3d5940}.book small,.beer-card small{color:#7f8e6c}.tiny{color:#89947b!important}.pill{background:#d9e5c3;color:#5d7747}.quiz-progress i{background:#d9dfc7}.quiz-progress i.done{background:#8eaa6e}.answer{background:#fffdf4;border-color:#cfd7bd;color:#45603e;border-radius:10px}.answer.correct{background:#dceac9;border-color:#8ba969}.answer.wrong{background:#f1dfd0;border-color:#c99475}.feedback{background:#e4ebd3;color:#4b6242}.reward{color:#739a50}.danger{color:#aa765d}
 .location #sound{flex-shrink:0;width:30px;margin-right:6px;font-size:14px}.location #place-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .bartender{display:flex;align-items:center;gap:16px;margin:0 0 18px}.bartender-portrait{width:192px;max-width:60%;aspect-ratio:34/35;flex:0 0 auto;background-repeat:no-repeat;background-color:transparent;image-rendering:pixelated;border-radius:10px}.bartender figcaption{min-width:0;font-size:18px;font-weight:700;color:#395347}.bartender small{display:block;font-size:10px;font-weight:400;color:#78826d;margin-top:5px}@media(max-width:380px){.bartender{gap:12px}}
+/* Dark dialogue menus: scoped to the sheet so the world keeps its own palette. */
+.sheet-backdrop{background:#101b19b8}
+.sheet{color-scheme:dark;background:#202b29;color:#f1eee4;border-top-color:#4b5b50;scrollbar-color:#66786b #202b29}
+.sheet h2,.sheet h3,.sheet .bartender figcaption{color:#f1eee4}
+.sheet p,.sheet .book small,.sheet .beer-card small,.sheet .bartender small{color:#bdc9bc}
+.sheet>header span,.sheet .form-label,.sheet .form-label small{color:#b6c9a1}
+.sheet>header button,.sheet .secondary{background:#35463d;color:#edf1df;border-color:#647960}
+.sheet .primary{background:#527958;color:#fff8e1;border-bottom-color:#314d39}
+.sheet .card,.sheet .book,.sheet .beer-card{background:#2b3932;border-color:#506348;color:#f1eee4}
+.sheet .pill{background:#40533b;color:#e3edca}
+.sheet .tiny{color:#b2bfa8!important}
+.sheet a{color:#b6d4eb}
+.sheet input{background:#18231f;border-color:#75866b;color:#f1eee4}
+.sheet .choices button:not(.swatch){background:#2d3c33;border-color:#64785a;color:#dce5d0}
+.sheet .choices button.active:not(.swatch){background:#455e3e;border-color:#a7bf85;color:#f6f5df}
+.sheet .choices .swatch{border-color:#202b29;box-shadow:0 0 0 1px #809272}
+.sheet .choices .swatch.active{box-shadow:0 0 0 3px #c1d99a}
+.sheet .character-stage.detailed{background:radial-gradient(ellipse at 50% 80%,#43573e,#2b3a30 68%);border-color:#607553}
+.sheet .character-stage.detailed>span{color:#c2cfae}
+.sheet .character-stage .rotate-character,.sheet .character-stage #preview-motion{background:#35463df2;border-color:#849673;color:#edf1df}
+.sheet .quiz-progress i{background:#4c5b4c}
+.sheet .quiz-progress i.done{background:#b1c98b}
+.sheet .answer{background:#293930;border-color:#657b58;color:#eff0e3}
+.sheet .answer.correct{background:#385534;border-color:#b2d08c;color:#f1f8e6}
+.sheet .answer.wrong{background:#603e34;border-color:#e4ad8e;color:#fff0e5}
+.sheet .feedback{background:#344638;color:#edf1df}
+.sheet .reward{color:#c5dca1}
+.sheet .danger{color:#f0b197}
+.sheet button:focus-visible,.sheet input:focus-visible,.sheet a:focus-visible{outline:3px solid #edc47b;outline-offset:3px}
+/* Header, location strip and bottom navigation match the supplied #181818 swatch. */
+.phone .hud,.phone .location,.phone.night-area .location,.phone nav{background:#181818;color:#f1eee4;border-color:#383838}
+.phone .identity strong,.phone .xp b{color:#f1eee4}
+.phone .identity span,.phone .xp small{color:#bdc9bc}
+.phone .hud button{background:#30372e;border-color:#65765a}
+.phone .xp-track{background:#394035}
+.phone .xp-track div{background:#b1c98b}
+.phone .location button{background:#252525;border-color:#6f7c65;color:#e4edda}
+.phone nav button{color:#b4bcb0}
+.phone nav button.selected{color:#d1e5aa}
+.phone .hud button:focus-visible,.phone .location button:focus-visible,.phone nav button:focus-visible{outline:3px solid #edc47b;outline-offset:2px}
+/* Bar workshop: touch-first placement in a fifteen-by-twelve metre room. */
+#bar-floor{display:block;width:100%;height:auto;aspect-ratio:5/4;border-radius:10px;touch-action:manipulation;margin:12px 0;cursor:crosshair}
+.builder-wallet{color:#d1e5aa;font-weight:700;font-size:12px}
+.builder-message{min-height:3em;font-size:12px;color:#e8d6a8;margin:10px 0}
+.builder-tools{display:flex;gap:6px}.builder-tools button{flex:1;background:#334239;color:#e9ecda;border:1px solid #748369;border-radius:8px;padding:9px 4px;font-size:11px}
+.builder-shop{display:grid;grid-template-columns:1fr 1fr;gap:8px}.builder-shop button{padding:10px 8px;text-align:left;background:#2b3932;color:#f1eee4;border:1px solid #65785a;border-radius:9px}.builder-shop strong{display:block;font-size:11px}.builder-shop small{display:block;font-size:10px;color:#c5dca1;margin-top:5px}

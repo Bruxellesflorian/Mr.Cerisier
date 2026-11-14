@@ -53,7 +53,7 @@ window.HoublonStreet = (() => {
     ctx.save();ctx.scale(window.HoublonView.streetZoom,window.HoublonView.streetZoom);ctx.translate(-cameraX,-cameraY);
     ctx.imageSmoothingEnabled=true;ctx.drawImage(image,0,0,width,height);
     if(current===1)window.HoublonAtmosphere.nightLights(ctx);
-    else window.HoublonAtmosphere.dayWind(ctx);
+    else window.HoublonAtmosphere.dayWind(ctx,image);
     maps[current].chimneys.forEach(([x,y],i)=>window.HoublonAtmosphere.chimney(ctx,x,y,i*1.7));
     for(const door of doors) {
       const completed=door.type==='bar'&&state.completed.includes(door.index);

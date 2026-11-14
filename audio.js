@@ -60,7 +60,7 @@ window.HoublonAudio = (() => {
   function tick(){
     if(!ctx||ctx.state!=='running'||muted||document.hidden)return;
     if(ctx.currentTime>=trackDeadline){
-      trackIndex=(trackIndex+1)%tracks.length;trackDeadline=ctx.currentTime+120;step=0;next=ctx.currentTime+.06;refresh();
+      trackIndex=(trackIndex+1)%tracks.length;trackDeadline=ctx.currentTime+60;step=0;next=ctx.currentTime+.06;refresh();
     }
     const {root,beat,melody,wave}=score();
     if(next<ctx.currentTime)next=ctx.currentTime+.04;
@@ -74,7 +74,7 @@ window.HoublonAudio = (() => {
       next+=beat;step++;
     }
   }
-  function start(){if(timer||!ctx||muted||document.hidden)return;next=ctx.currentTime+.06;if(trackDeadline===null)trackDeadline=ctx.currentTime+120;timer=setInterval(tick,80);tick();}
+  function start(){if(timer||!ctx||muted||document.hidden)return;next=ctx.currentTime+.06;if(trackDeadline===null)trackDeadline=ctx.currentTime+60;timer=setInterval(tick,80);tick();}
   async function unlock(){
     if(muted||document.hidden)return;
     try{

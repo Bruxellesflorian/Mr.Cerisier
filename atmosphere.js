@@ -64,45 +64,75 @@ window.HoublonAtmosphere = (() => {
   }
   // Crown accents stay inside the painted foliage; only tiny loose leaves drift away.
   const dayTrees=[[31,18],[16,105],[584,32],[18,365],[701,474],[467,539],[88,653]];
-  // Short trails centred on the day map's paving, clear of building facades.
-  const leafTrails=[[90,215,260,215],[390,286,620,286],
-    [90,426,275,426],[390,513,620,513],[100,624,285,624],
-    [350,265,362,390],[350,460,362,595],[210,668,455,678]];
-  function dayWind(c) {
+  const crowns=[[31,18,21,16],[16,105,11,19],[584,32,29,23],
+    [18,365,13,20],[701,474,14,17],[467,539,22,21],[88,653,19,18]];
+  function swayTrees(c,image,t){
+    const sx=image.naturalWidth/720,sy=image.naturalHeight/738;
+    crowns.forEach(([x,y,rx,ry],i)=>{
+      const gust=1.8+1.2*Math.sin(t*.7+i*.4),sway=Math.sin(t*1.5+i*.65)*gust;
+      c.save();c.beginPath();c.ellipse(x,y,rx,ry,0,0,Math.PI*2);c.clip();
+      // Warp narrow canopy strips in place; the trunk and surrounding buildings stay fixed.
+      for(let dy=-ry;dy<ry;dy+=2){
+        const shift=sway*Math.sin((dy+ry)/(ry*2)*Math.PI);
+        const sourceX=Math.max(0,x-rx-shift),sourceY=Math.max(0,y+dy);
+        c.drawImage(image,sourceX*sx,sourceY*sy,rx*2*sx,2*sy,x-rx,y+dy,rx*2,2);
+      }
+      c.restore();
+    });
+  }
+  // Independent particles scattered over paved surfaces, rather than shared trails.
+  const leafZones=[[333,22,378,710],[58,212,333,240],[382,282,661,310],
+    [65,425,333,454],[382,512,660,540],[82,620,333,651],[158,650,502,706]];
+  let leafSeed=73429;
+  const randomLeaf=()=>{leafSeed=(Math.imul(1664525,leafSeed)+1013904223)>>>0;return leafSeed/4294967296;};
+  const groundLeaves=Array.from({length:170},(_,i)=>({
+    zone:leafZones[i%leafZones.length],u:randomLeaf(),v:randomLeaf(),
+    speed:4+randomLeaf()*13,drift:(randomLeaf()-.5)*7,
+    phase:randomLeaf()*Math.PI*2,turn:.6+randomLeaf()*1.7,
+    radius:1.3+randomLeaf()*1.1,lift:randomLeaf()<.25?4+randomLeaf()*5:randomLeaf()*2,
+    color:['#9a9c60','#b99a66','#7c9058'][Math.floor(randomLeaf()*3)]
+  }));
+  const airLeaves=Array.from({length:84},()=>({offset:randomLeaf(),duration:7+randomLeaf()*6,
+    x:(randomLeaf()-.5)*32,y:(randomLeaf()-.5)*24,drift:40+randomLeaf()*65,phase:randomLeaf()*6.28}));
+  const wrap=(n,size)=>((n%size)+size)%size;
+  function dayWind(c,image) {
     if(reduced?.matches)return;
     const t=time();c.save();
+    if(image?.naturalWidth)swayTrees(c,image,t);
     dayTrees.forEach(([x,y],i)=>{
-      const sway=Math.sin(t*.85+i*1.7)*1.1;
+      const sway=Math.sin(t*1.5+i*.65)*3;
       // A few moving flecks give the flat, baked-in canopy a gentle rustle.
       for(let j=0;j<4;j++) {
         c.globalAlpha=.18;c.fillStyle=j%2?'#d1d39a':'#567347';
         c.beginPath();c.ellipse(x+(j-1.5)*5+sway,y+Math.sin(j*2+i)*5,
           2.6,1.3,Math.sin(t*.7+i)*.2,0,Math.PI*2);c.fill();
       }
-      for(let j=0;j<5;j++) {
-        const age=(t/(13+i%3)+i*.137+j*.2)%1;
-        const drift=age*(38+j*5),flutter=Math.sin(t*1.6+i+j*3);
-        c.globalAlpha=Math.sin(age*Math.PI)*.48;
+      for(let j=0;j<12;j++) {
+        const leaf=airLeaves[i*12+j],age=(t/leaf.duration+leaf.offset)%1;
+        const drift=age*leaf.drift,flutter=Math.sin(t*2.6+leaf.phase);
+        c.globalAlpha=Math.sin(age*Math.PI)*.65;
         c.fillStyle=(i+j)%2?'#b4b678':'#78915b';
-        c.beginPath();c.ellipse(x+drift+flutter*2+(j-2)*4,y+age*35+Math.sin(age*9+i)*3,
+        c.beginPath();c.ellipse(x+drift+flutter*4+leaf.x,y+age*35+Math.sin(age*9+leaf.phase)*6+leaf.y,
           1.7,.55+Math.abs(flutter)*.35,age*5+i,0,Math.PI*2);c.fill();
       }
     });
-    leafTrails.forEach(([x1,y1,x2,y2],i)=>{
-      // Monotonic motion alternates between near-rest and a gentle gust.
-      const wind=t-.88*Math.sin(t*.8+i*.6)/.8;
-      for(let j=0;j<4;j++) {
-        const age=(wind/(24+i%3*3)+j*.25+i*.113)%1;
-        const flutter=Math.sin(t*2+i+j*2),x=x1+(x2-x1)*age;
-        const y=y1+(y2-y1)*age+Math.sin(age*10+j)*1.6;
-        const opacity=Math.min(1,age*10,(1-age)*10)*.6;
-        c.globalAlpha=opacity*.18;c.fillStyle='#544735';
-        c.beginPath();c.ellipse(x+.6,y+.8,2.2,.65,0,0,Math.PI*2);c.fill();
-        c.globalAlpha=opacity;c.fillStyle=['#9a9c60','#b99a66','#7c9058'][(i+j)%3];
-        c.beginPath();c.ellipse(x,y,1.9,.65+Math.abs(flutter)*.2,
-          i+j+age*4+flutter*.25,0,Math.PI*2);c.fill();
-      }
+    groundLeaves.forEach(leaf=>{
+      const [left,top,right,bottom]=leaf.zone,w=right-left,h=bottom-top;
+      const wind=t-.8*Math.sin(t*.8+leaf.phase)/.8;
+      const u=wrap(leaf.u*w+wind*leaf.speed+Math.sin(t*leaf.turn+leaf.phase)*5,w);
+      const v=wrap(leaf.v*h+t*leaf.drift+Math.sin(t*.7+leaf.phase)*4,h);
+      const x=left+u,ground=top+v;
+      const flutter=Math.sin(t*leaf.turn*2+leaf.phase);
+      const lift=Math.max(0,Math.sin(t*1.6+leaf.phase))*leaf.lift;
+      // Fade at each boundary so wrapping never appears as a teleport.
+      const opacity=Math.min(1,u/6,(w-u)/6,v/4,(h-v)/4)*.8;
+      c.globalAlpha=opacity*.18;c.fillStyle='#544735';
+      c.beginPath();c.ellipse(x+.6,ground+.8,leaf.radius,.65,0,0,Math.PI*2);c.fill();
+      c.globalAlpha=opacity;c.fillStyle=leaf.color;
+      c.beginPath();c.ellipse(x,ground-lift,leaf.radius,.55+Math.abs(flutter)*.4,
+        leaf.phase+t*leaf.turn+flutter*.3,0,Math.PI*2);c.fill();
     });
+
     c.restore();
   }
   return {chimney,fire,glow,time,nightLights,dayWind};

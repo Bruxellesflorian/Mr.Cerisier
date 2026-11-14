@@ -65,6 +65,18 @@ Le dossier était vide lors de la création du prototype. Les quatre fiches et l
 
 ## Structure et évolution
 
+### Atelier « Mon bar »
+
+Le troisième bouton de la navigation ouvre une pièce vide de 15 × 12 cases (une case = un mètre). Choisir un équipement dans le catalogue puis toucher le plan pour l’acheter et le placer. Toucher un élément posé permet de le déplacer, le pivoter puis confirmer sa position, ou le revendre au prix d’achat. Le plan et les achats sont enregistrés avec la progression. Au clavier, les flèches déplacent le curseur du plan et Entrée permet de placer/sélectionner.
+
+Le budget est constitué des XP gagnés dans les examens moins le coût des équipements possédés. Le niveau et le total historique d’XP restent inchangés. Le premier aménagement complet coûte 540 XP : comptoir, tireuse, fût, entrée, toilettes, table de deux places, tonneau de deux places et Alex, le premier barman. Les tables existent en deux, quatre ou six places ; les tonneaux avec tabourets en deux ou quatre places.
+
+Pour ouvrir, il faut au moins un équipement de chaque catégorie. Chaque tireuse doit se trouver à trois mètres maximum du centre d’un fût, et les équipements doivent rester accessibles depuis l’entrée. Les tireuses sont reliées au fût le plus proche par un trait indiquant la distance. L’entrée se place sur un bord de la pièce. Une seule entrée et un seul barman sont disponibles dans ce prototype.
+
+Une fois ouvert, jusqu’à six clients entrent, commandent au comptoir, prennent une place disponible puis repartent. Les ventes sont comptabilisées, sans revenu supplémentaire en XP ni gestion des stocks pour le moment. Fermer le bar, quitter son menu ou mettre la page en arrière-plan interrompt la simulation ; les achats et les ventes déjà enregistrées sont conservés. Il n’y a pas de progression hors ligne.
+
+Code : `bar-builder.js`. Vérifications : `node --test bar-builder.test.cjs portraits.test.cjs` (achats, déplacement, revente, sauvegarde, distance des tireuses, accès et service des clients).
+
 - `index.html` : interface en français au format portrait.
 - `style.css` : présentation ordinateur et mise en page adaptable.
 - `game.js` : rendu 2D en pixel art au style rétro 32 bits, mouvements, collisions, personnage, quiz et sauvegarde.
