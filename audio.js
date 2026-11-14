@@ -1,10 +1,10 @@
 /* Original miniature scores, synthesized locally: no downloads or audio dependencies. */
 window.HoublonAudio = (() => {
-  let ctx,master,music,timer,scene='day',step=0,next=0,muted=false,trackIndex=0,trackDeadline=null;
+  let ctx,master,music,timer,scene='day',step=0,next=0,muted=false,trackIndex=null,trackDeadline=null,trackOrder=[],trackCursor=0;
   const voices=new Set(),key='cerisier-audio-muted';
   try{muted=localStorage.getItem(key)==='true';}catch{}
-  // Ten original, looping miniatures. The playlist advances on audio-context time,
-  // so muting or switching browser tabs does not skip a track.
+  // Ten original, looping miniatures. A shuffled bag avoids repeats until each
+  // track has played; the playlist advances on audio-context time.
   const tracks=[
     {title:'Matin à la brasserie',root:60,beat:.38,mode:'major',wave:'sine',lead:0,melody:[0,4,7,12,9,7,4,null,2,5,9,12,7,4,2,null]},
     {title:'La rue des lanternes',root:57,beat:.46,mode:'minor',wave:'triangle',lead:1,melody:[0,7,10,14,12,null,7,3,5,12,15,14,10,null,7,3]},
@@ -17,6 +17,14 @@ window.HoublonAudio = (() => {
     {title:'La place au clair de lune',root:58,beat:.50,mode:'minor',wave:'sine',lead:4,melody:[0,7,null,10,14,12,null,7,5,10,12,null,10,7,3,null]},
     {title:'Dernière tournée',root:60,beat:.41,mode:'major',wave:'triangle',lead:3,melody:[7,9,12,16,14,12,9,7,5,9,12,14,12,9,5,4]}
   ];
+  function shuffleTracks(previous=-1){
+    trackOrder=tracks.map((_,i)=>i);
+    for(let i=trackOrder.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[trackOrder[i],trackOrder[j]]=[trackOrder[j],trackOrder[i]];}
+    if(trackOrder.length>1&&trackOrder[0]===previous){const j=1+Math.floor(Math.random()*(trackOrder.length-1));[trackOrder[0],trackOrder[j]]=[trackOrder[j],trackOrder[0]];}
+    trackCursor=0;
+  }
+  function nextTrack(){if(trackCursor>=trackOrder.length)shuffleTracks(trackIndex??-1);trackIndex=trackOrder[trackCursor++];return trackIndex;}
+  shuffleTracks();nextTrack();
   function score(){return tracks[trackIndex];}
   function note(midi,at,duration,volume,bus,type='sine',attack=.025){
     const osc=ctx.createOscillator(),gain=ctx.createGain();
@@ -37,7 +45,7 @@ window.HoublonAudio = (() => {
     [null,null,2,null,null,4,null,6,null,5,null,null,4,null,null,null]
   ];
   function layers(root,beat,at){
-    const minor=score().mode==='minor'||scene==='night'||(scene.startsWith('bar-')&&Number(scene.split('-')[1])>=4);
+    const minor=score().mode==='minor'||scene==='night'||scene==='gothic'||(scene.startsWith('bar-')&&Number(scene.split('-')[1])>=4);
     const scale=minor?[0,2,3,5,7,10,12]:[0,2,4,5,7,9,12];
     const chordRoot=root+(Math.floor(step/8)%2?5:0);
     if(step%8===0){
@@ -60,7 +68,7 @@ window.HoublonAudio = (() => {
   function tick(){
     if(!ctx||ctx.state!=='running'||muted||document.hidden)return;
     if(ctx.currentTime>=trackDeadline){
-      trackIndex=(trackIndex+1)%tracks.length;trackDeadline=ctx.currentTime+60;step=0;next=ctx.currentTime+.06;refresh();
+      nextTrack();trackDeadline=ctx.currentTime+40;step=0;next=ctx.currentTime+.06;refresh();
     }
     const {root,beat,melody,wave}=score();
     if(next<ctx.currentTime)next=ctx.currentTime+.04;
@@ -74,7 +82,7 @@ window.HoublonAudio = (() => {
       next+=beat;step++;
     }
   }
-  function start(){if(timer||!ctx||muted||document.hidden)return;next=ctx.currentTime+.06;if(trackDeadline===null)trackDeadline=ctx.currentTime+60;timer=setInterval(tick,80);tick();}
+  function start(){if(timer||!ctx||muted||document.hidden)return;next=ctx.currentTime+.06;if(trackDeadline===null)trackDeadline=ctx.currentTime+40;timer=setInterval(tick,80);tick();}
   async function unlock(){
     if(muted||document.hidden)return;
     try{

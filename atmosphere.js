@@ -135,5 +135,14 @@ window.HoublonAtmosphere = (() => {
 
     c.restore();
   }
-  return {chimney,fire,glow,time,nightLights,dayWind};
+  function gothicLights(c){
+    const t=time();c.save();
+    [[193,210],[526,220],[181,447],[571,476],[154,647],[300,700],[420,700]].forEach(([x,y],i)=>{
+      c.fillStyle='#403346';c.fillRect(x-27,y-8,8,10);fire(c,x-23,y-8,i);
+      glow(c,x,y-35,45,'#ffd18b',.16+.025*Math.sin(t*2+i));
+      c.save();c.globalCompositeOperation='screen';glow(c,x,y+8,26,'#dba6d8',.12);
+      c.fillStyle='#f5c98b';c.globalAlpha=.15;for(let j=0;j<3;j++)c.fillRect(x-10+j*2,y+6+j*4,20-j*4,1);c.restore();
+    });c.restore();
+  }
+  return {chimney,fire,glow,time,nightLights,dayWind,gothicLights};
 })();

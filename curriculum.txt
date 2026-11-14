@@ -1,0 +1,71 @@
+Pils allemande|5/5D/german-pils/
+La pils allemande est généralement de quelle couleur ?|Blonde|Noire|Brune foncée|La pils allemande est une bière blonde : sa couleur va du jaune pâle au doré.
+Quelle sensation retrouve-t-on souvent dans une pils ?|De l’amertume|Un goût très sucré|Un goût fumé|La pils présente une amertume marquée, notamment apportée par le houblon.
+Le parfum du houblon d’une pils peut rappeler…|Les fleurs et les herbes|Le café et le cacao|La fumée et le bois brûlé|Dans une pils, le houblon peut évoquer les fleurs, les herbes ou les épices.
+Une pils est plutôt…|Légère en bouche|Épaisse comme un sirop|Crémeuse comme un dessert|Une pils est plutôt légère en bouche. Cela décrit sa texture, pas son taux d’alcool.
+
+Blanche belge · Witbier|24/24A/witbier/
+Quelle céréale est importante dans une blanche belge ?|Le blé|Le riz|Le seigle|La blanche belge, aussi appelée witbier, est une bière à base de blé et d’orge.
+Quelles épices peut-on retrouver dans une blanche belge ?|Coriandre et écorce d’orange|Vanille et cannelle|Cacao et café|La coriandre et l’écorce d’orange font partie des ingrédients traditionnels de la blanche belge.
+Une blanche belge est souvent trouble. Cela veut dire…|Qu’on ne voit pas nettement à travers|Qu’elle est forcément abîmée|Qu’elle est toujours très alcoolisée|« Trouble » décrit son aspect peu transparent. C’est habituel pour une blanche belge.
+La blanche belge est généralement…|Peu amère|Très amère|Très fumée|La blanche belge est généralement peu amère, avec des arômes délicatement épicés.
+
+IPA · American IPA|21/21A/american-ipa/
+Quel ingrédient est la vedette d’une IPA ?|Le houblon|Le blé|Le malt fumé|Dans une American IPA, le houblon occupe une place importante dans les arômes et l’amertume.
+Une IPA peut sentir les agrumes grâce…|Au houblon|Au verre|À sa couleur|Certains houblons donnent des parfums d’agrumes, même sans ajout de fruits.
+Une American IPA est souvent connue pour…|Son amertume|Son goût salé|Son goût de café|L’amertume est une caractéristique importante de l’American IPA.
+Dans une IPA, le malt sert notamment à…|Soutenir les saveurs du houblon|Supprimer tous les arômes|Donner obligatoirement un goût brûlé|Le malt apporte une base de saveurs, tout en laissant le houblon s’exprimer.
+
+Ambrée · American Amber Ale|19/19A/american-amber-ale/
+Le mot « ambrée » décrit d’abord…|La couleur de la bière|Sa température|La taille du verre|Une bière ambrée a une couleur qui peut rappeler l’ambre ou le cuivre.
+Le malt d’une American Amber Ale peut rappeler…|Le caramel|Le citron acide|La fumée|Dans cette ambrée américaine, le malt apporte souvent des notes de caramel.
+Quel autre parfum peut accompagner le caramel ?|Le biscuit|Le vinaigre|Le café brûlé intense|Le malt peut aussi donner des notes de biscuit ou de pain grillé, sans goût fortement brûlé.
+Deux ambrées peuvent-elles avoir une amertume différente ?|Oui, selon leur recette|Non, la couleur impose le même goût|Non, elles sont toujours sans amertume|Dans ce style, certaines recettes mettent davantage en avant le malt, d’autres le houblon.
+
+Saison|25/25B/saison/
+Une saison est un style de bière d’origine…|Belge|Japonaise|Mexicaine|La saison appartient à une famille de bières belges aux arômes souvent fruités et épicés.
+Dire qu’une saison finit « sèche » signifie…|Qu’elle laisse peu de douceur sucrée|Qu’elle n’a pas de bulles|Qu’elle est servie chaude|Une finale sèche laisse peu de douceur sucrée après la gorgée. Une saison est généralement très sèche.
+Les bulles d’une saison sont généralement…|Bien présentes|Toujours absentes|Réservées aux versions foncées|La saison est généralement très pétillante : on dit aussi qu’elle a une forte effervescence.
+Quel parfum épicé peut rappeler une saison ?|Le poivre|Le cacao|La vanille|La fermentation d’une saison peut donner des notes poivrées, même sans ajout de poivre.
+
+Tripel belge|26/26C/belgian-tripel/
+La tripel belge est généralement…|Une bière blonde assez forte|Une bière noire fumée|Une bière sans alcool|La tripel est une bière belge généralement blonde et assez forte en alcool.
+Quels arômes sont fréquents dans une tripel ?|Fruits et épices|Fumée et café|Vinaigre et sel|La tripel présente souvent des arômes fruités et épicés, produits notamment pendant la fermentation.
+Une tripel est habituellement…|Bien pétillante|Toujours sans bulles|Très épaisse comme un sirop|Une tripel est généralement bien pétillante et ne doit pas sembler lourde ou sirupeuse.
+Une tripel forte doit-elle forcément finir très sucrée ?|Non, sa finale est généralement sèche|Oui, l’alcool impose un goût sucré|Oui, si sa couleur est blonde|Malgré sa force, la tripel laisse généralement peu de douceur sucrée en fin de gorgée.
+
+Lambic traditionnel|23/23D/lambic/
+Le lambic traditionnel est associé à quel pays ?|La Belgique|L’Italie|Le Canada|Le lambic est une bière traditionnelle belge, souvent acidulée.
+Quelle sensation caractérise souvent le lambic ?|L’acidité|Une forte saveur fumée|Une douceur de caramel dominante|Le lambic est souvent acide ou acidulé, une sensation différente de l’amertume.
+Un lambic traditionnel servi presque sans bulles…|Peut être tout à fait normal|Est forcément raté|Doit obligatoirement être jeté|Le lambic traditionnel peut se servir presque sans bulles. Tous les styles ne pétillent pas de la même façon.
+En vieillissant, un lambic peut développer des parfums…|De foin ou de terre|Obligatoirement de café brûlé|Uniquement de houblon frais|Avec le temps, le lambic peut prendre des parfums de foin ou de terre, souvent décrits comme rustiques.
+
+Bière fumée · Rauchbier|6/6B/rauchbier/
+Quel arôme distingue la Rauchbier ?|La fumée|La banane|Le citron|La Rauchbier est une bière allemande connue pour son parfum fumé.
+D’où vient traditionnellement ce parfum fumé ?|Du malt fumé|Du verre chauffé|D’un ajout de café|Le malt utilisé peut être fumé au bois de hêtre, ce qui transmet ce parfum à la bière.
+Sous la fumée, quel goût peut-on retrouver ?|Du pain grillé|Du vinaigre dominant|Du citron très acide|La Rauchbier conserve une base de malt qui peut rappeler le pain grillé.
+Deux Rauchbiers doivent-elles sentir exactement autant la fumée ?|Non, son intensité peut varier|Oui, c’est toujours identique|Oui, sinon elles ne sont pas des bières|Le parfum fumé peut être discret ou intense selon la recette, en restant agréable avec le malt.
+
+Bière brune · British Brown Ale|13/13B/british-brown-ale/
+Une British Brown Ale est une bière…|Brune britannique|Blanche belge|Blonde allemande|La British Brown Ale est un style de bière brune britannique. Toutes les bières brunes ne sont pas de ce style.
+Quels arômes peut évoquer cette brune ?|Les noix et le caramel|Le citron et le sel|La fumée et le poivre|Le malt de cette brune peut rappeler les noix, le caramel ou le biscuit.
+Une légère note de chocolat dans cette brune…|Peut faire partie de son goût|Prouve forcément un défaut|Signifie toujours qu’on a ajouté du cacao|Une note légère de chocolat est possible, sans qu’un goût brûlé domine.
+La couleur brune suffit-elle à connaître tous ses arômes ?|Non, il faut aussi la sentir et la goûter|Oui, toutes les brunes ont le même goût|Oui, toutes les brunes sont fumées|La couleur donne un indice, mais plusieurs styles bruns ont des arômes différents.
+
+Doppelbock|9/9A/doppelbock/
+La doppelbock est un style de bière…|Allemand|Belge|Irlandais|La doppelbock est une bière allemande forte, connue pour la richesse de son malt.
+Quel ingrédient marque surtout son goût ?|Le malt|Le fruit ajouté|Les épices ajoutées|Dans une doppelbock, les saveurs du malt passent au premier plan.
+Une doppelbock est-elle toujours foncée ?|Non, il existe des versions claires|Oui, elle est toujours noire|Oui, elle est toujours brune foncée|Il existe des doppelbocks claires et foncées. La couleur seule ne définit pas ce style.
+Une version foncée peut rappeler…|Le pain bien grillé|Le citron pressé|Une fumée dominante|Le malt d’une doppelbock foncée peut évoquer le pain bien grillé, sans goût brûlé dominant.
+
+Barleywine anglais|17/17D/english-barleywine/
+Malgré son nom, un barleywine est…|Une bière|Un vin de raisin|Un cidre|Le barleywine anglais est une bière forte, même si son nom contient le mot anglais « wine ».
+Son goût met souvent en avant…|La richesse du malt|Une acidité de citron dominante|Une fumée dominante|Le barleywine anglais est riche en saveurs de malt, parfois proches du pain ou du caramel.
+Dire qu’il a du « corps » décrit…|Sa consistance en bouche|La hauteur de la bouteille|Sa couleur uniquement|Le corps décrit la sensation de consistance en bouche. Un barleywine paraît généralement ample.
+Avec le temps, un barleywine peut développer des notes…|De fruits secs|Forcément de café brûlé|Toujours de fruits tropicaux frais|En vieillissant, un barleywine peut développer des notes de fruits secs et des arômes plus complexes.
+
+Stout · Irish Stout|15/15B/irish-stout/
+L’Irish Stout est généralement…|Très foncée|Jaune pâle|Ambrée claire|L’Irish Stout est une bière très foncée, qui peut paraître noire ou brun profond.
+Quel parfum est fréquent dans une Irish Stout ?|Le café|La banane|La coriandre|L’Irish Stout présente souvent des notes de café, parfois accompagnées de cacao.
+Ces notes de café peuvent venir…|Des grains fortement chauffés|Uniquement de café ajouté|De la forme du verre|Les grains torréfiés, c’est-à-dire fortement chauffés, peuvent apporter ces notes sans ajout de café.
+À la pression, quel gaz peut rendre sa mousse très crémeuse ?|L’azote|L’hélium|L’oxygène|Le service à l’azote peut donner une mousse très crémeuse. Une stout en bouteille peut avoir une mousse différente.

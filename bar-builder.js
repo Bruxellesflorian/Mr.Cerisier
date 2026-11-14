@@ -1,6 +1,6 @@
 /* Local bar workshop. One floor tile represents one metre. */
 window.HoublonBar=(()=>{
- const W=15,H=12,S=32;
+ const W=15,H=12,S=40;
  const catalog=[
   {id:'counter',type:'counter',name:'Comptoir',price:120,w:3,h:1,color:'#976946'},
   {id:'tap',type:'tap',name:'Têtes de bière',price:70,w:1,h:1,color:'#d4b46d'},
@@ -46,7 +46,7 @@ window.HoublonBar=(()=>{
   }return [...new Set(errors)];
  }
  let cleanup=()=>{};
- const html=()=>`<h2 id="sheet-title">Mon bar</h2><p>Aménagez votre établissement. Une case = 1 m. Choisissez un achat, puis touchez une case libre. Touchez un élément posé pour le déplacer.</p><div class="builder-wallet" id="bar-wallet"></div><canvas id="bar-floor" width="480" height="384" tabindex="0" aria-label="Plan du bar. Flèches pour choisir une case, Entrée pour placer ou sélectionner."></canvas><div id="bar-message" role="status" class="builder-message"></div><div class="builder-tools"><button id="bar-turn">↻ Pivoter</button><button id="bar-cancel">Annuler</button><button id="bar-remove">Revendre</button></div><button id="bar-open" class="primary">Ouvrir le bar</button><div id="bar-checklist" class="card"></div><h3 id="bar-shop-title">Équipement</h3><div id="bar-shop" class="builder-shop"></div><p class="tiny">Le mobilier comprend ses sièges. Alex est le premier barman disponible. Revente au prix d’achat pour tester librement. Les clients achètent des bières fictives ; leurs visites ne rapportent pas encore d’XP.</p>`;
+ const html=()=>`<h2 id="sheet-title">Mon bar</h2><p>Aménagez votre établissement. Une case = 1 m. Choisissez un achat, puis touchez une case libre. Faites glisser le plan pour le déplacer ; touchez un élément posé pour le sélectionner.</p><div class="builder-wallet" id="bar-wallet"></div><h3 id="bar-shop-title">Équipement · faites défiler</h3><div id="bar-shop" class="builder-shop" aria-label="Équipement à placer"></div><div class="bar-floor-viewport" aria-label="Plan défilable du bar"><canvas id="bar-floor" width="600" height="480" tabindex="0" aria-label="Plan du bar. Faites glisser pour le déplacer. Flèches pour choisir une case, Entrée pour placer ou sélectionner."></canvas></div><div id="bar-message" role="status" class="builder-message"></div><div class="builder-tools"><button id="bar-turn">↻ Pivoter</button><button id="bar-cancel">Annuler</button><button id="bar-remove">Revendre</button></div><button id="bar-open" class="primary">Ouvrir le bar</button><div id="bar-checklist" class="card"></div><p class="tiny">Le mobilier comprend ses sièges. Alex est le premier barman disponible. Revente au prix d’achat pour tester librement. Les clients achètent des bières fictives ; leurs visites ne rapportent pas encore d’XP.</p>`;
  function mount({state,earned,save}){
   cleanup();const $=id=>document.getElementById(id),canvas=$('bar-floor'),c=canvas.getContext('2d');
   if(!state.myBar||!Array.isArray(state.myBar.items))state.myBar={items:[],sales:0};
@@ -56,6 +56,7 @@ window.HoublonBar=(()=>{
   const spent=()=>data.items.reduce((n,i)=>n+def(i).price,0),balance=()=>Math.max(0,earned()-spent());
   const message=text=>{$('bar-message').textContent=text;};
   function refresh(){
+   const panMode=!opened&&!buy&&!selected;canvas.classList.toggle('pan-mode',panMode);canvas.style.touchAction=panMode?'pan-y':'manipulation';
    $('bar-wallet').textContent=`${balance()} XP disponibles · ${spent()} XP investis · ${data.sales} bières servies`;
    const errors=openingErrors(data.items);$('bar-checklist').replaceChildren();
    const text=document.createElement('p');text.textContent=opened?'Le bar est ouvert. Les clients commandent, s’installent puis repartent.':errors.length?errors.join(' '):'Tout est prêt : vous pouvez accueillir les clients !';$('bar-checklist').append(text);
@@ -63,8 +64,8 @@ window.HoublonBar=(()=>{
    $('bar-open').disabled=!opened&&errors.length>0;
    $('bar-turn').disabled=opened||!buy&&!selected;$('bar-remove').disabled=opened||!selected;$('bar-cancel').disabled=opened||!buy&&!selected;
    $('bar-shop').hidden=opened;$('bar-shop-title').hidden=opened;
-   $('bar-shop').innerHTML=catalog.map(d=>`<button data-buy="${d.id}" ${d.price>balance()||(['entry','staff'].includes(d.type)&&type(data.items,d.type).length)?'disabled':''}><strong>${d.name}</strong><small>${d.price} XP${d.seats?' · '+d.seats+' places':''}</small></button>`).join('');
-   $('bar-shop').querySelectorAll('[data-buy]').forEach(b=>b.onclick=()=>{buy=b.dataset.buy;selected=null;rot=false;message('À placer : '+catalog.find(d=>d.id===buy).name+'. Aucun XP débité avant le placement.');refresh();canvas.scrollIntoView({block:'center',behavior:'smooth'});});
+   $('bar-shop').innerHTML=catalog.map(d=>`<button data-buy="${d.id}" class="${buy===d.id?'selected':''}" aria-pressed="${buy===d.id}" ${d.price>balance()||(['entry','staff'].includes(d.type)&&type(data.items,d.type).length)?'disabled':''}><strong>${d.name}</strong><small>${d.price} XP${d.seats?' · '+d.seats+' places':''}</small></button>`).join('');
+   $('bar-shop').querySelectorAll('[data-buy]').forEach(b=>b.onclick=()=>{buy=b.dataset.buy;selected=null;rot=false;message('À placer : '+catalog.find(d=>d.id===buy).name+'. Aucun XP débité avant le placement.');refresh();canvas.parentElement.scrollIntoView({block:'center',inline:'nearest',behavior:'smooth'});});
   }
   function place(x,y){if(opened)return;cursor=[x,y];cursorVisible=true;
    if(buy||selected){const item=buy?{id:Math.max(0,...data.items.map(i=>i.id))+1,kind:buy,x,y,rot}:{...selected,x,y,rot};
@@ -75,7 +76,12 @@ window.HoublonBar=(()=>{
    }else{selected=data.items.find(i=>{const [w,h]=size(i);return x>=i.x&&x<i.x+w&&y>=i.y&&y<i.y+h;})||null;
     if(selected){rot=!!selected.rot;message(def(selected).name+' : touchez sa nouvelle position ou choisissez Revendre.');}refresh();}
   }
-  canvas.onclick=e=>{const r=canvas.getBoundingClientRect();place(Math.min(W-1,Math.floor((e.clientX-r.left)/r.width*W)),Math.min(H-1,Math.floor((e.clientY-r.top)/r.height*H)));};
+  let drag=null,suppressClickUntil=0;
+  canvas.onpointerdown=e=>{if(!canvas.classList.contains('pan-mode')||(e.pointerType==='mouse'&&e.button!==0))return;drag={id:e.pointerId,x:e.clientX,y:e.clientY,left:canvas.parentElement.scrollLeft,top:canvas.parentElement.scrollTop,moved:false};canvas.setPointerCapture(e.pointerId);};
+  canvas.onpointermove=e=>{if(!drag||drag.id!==e.pointerId)return;const dx=e.clientX-drag.x,dy=e.clientY-drag.y;if(!drag.moved&&Math.hypot(dx,dy)>6){drag.moved=true;canvas.classList.add('dragging');}if(drag.moved){canvas.parentElement.scrollLeft=drag.left-dx;canvas.parentElement.scrollTop=drag.top-dy;}};
+  const endDrag=e=>{if(!drag||drag.id!==e.pointerId)return;if(drag.moved)suppressClickUntil=performance.now()+400;canvas.classList.remove('dragging');if(canvas.hasPointerCapture(e.pointerId))canvas.releasePointerCapture(e.pointerId);drag=null;};
+  canvas.onpointerup=endDrag;canvas.onpointercancel=endDrag;
+  canvas.onclick=e=>{if(performance.now()<suppressClickUntil){e.preventDefault();e.stopPropagation();return;}const r=canvas.getBoundingClientRect();place(Math.min(W-1,Math.floor((e.clientX-r.left)/r.width*W)),Math.min(H-1,Math.floor((e.clientY-r.top)/r.height*H)));};
   canvas.onkeydown=e=>{const delta={ArrowLeft:[-1,0],ArrowRight:[1,0],ArrowUp:[0,-1],ArrowDown:[0,1]}[e.key];if(delta){e.preventDefault();cursor=[Math.max(0,Math.min(W-1,cursor[0]+delta[0])),Math.max(0,Math.min(H-1,cursor[1]+delta[1]))];cursorVisible=true;}if(e.key==='Enter'||e.key===' '){e.preventDefault();place(...cursor);}};
   $('bar-turn').onclick=()=>{rot=!rot;message('Orientation changée : touchez une case pour confirmer.');};
   $('bar-cancel').onclick=()=>{selected=null;buy=null;refresh();message('Sélection annulée.');};

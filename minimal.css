@@ -59,8 +59,11 @@ body{background:#eee8d8;background-image:none;color:var(--ink)}
 .phone nav button.selected{color:#d1e5aa}
 .phone .hud button:focus-visible,.phone .location button:focus-visible,.phone nav button:focus-visible{outline:3px solid #edc47b;outline-offset:2px}
 /* Bar workshop: touch-first placement in a fifteen-by-twelve metre room. */
-#bar-floor{display:block;width:100%;height:auto;aspect-ratio:5/4;border-radius:10px;touch-action:manipulation;margin:12px 0;cursor:crosshair}
+.bar-floor-viewport{width:100%;overflow-x:auto;overflow-y:hidden;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch;border-radius:10px;touch-action:pan-x pan-y;margin:12px 0;scrollbar-color:#66786b #202b29}
+#bar-floor{display:block;width:600px;max-width:none;height:480px;border-radius:10px;touch-action:pan-x pan-y;cursor:crosshair}
+#bar-floor.pan-mode{touch-action:pan-y;cursor:grab}#bar-floor.pan-mode.dragging{cursor:grabbing}
 .builder-wallet{color:#d1e5aa;font-weight:700;font-size:12px}
 .builder-message{min-height:3em;font-size:12px;color:#e8d6a8;margin:10px 0}
 .builder-tools{display:flex;gap:6px}.builder-tools button{flex:1;background:#334239;color:#e9ecda;border:1px solid #748369;border-radius:8px;padding:9px 4px;font-size:11px}
-.builder-shop{display:grid;grid-template-columns:1fr 1fr;gap:8px}.builder-shop button{padding:10px 8px;text-align:left;background:#2b3932;color:#f1eee4;border:1px solid #65785a;border-radius:9px}.builder-shop strong{display:block;font-size:11px}.builder-shop small{display:block;font-size:10px;color:#c5dca1;margin-top:5px}
+.builder-shop{display:flex;gap:8px;overflow-x:auto;padding:3px 2px 10px;scroll-snap-type:x mandatory;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch;touch-action:pan-x pan-y;scrollbar-color:#66786b #202b29}
+.builder-shop button{flex:0 0 142px;min-height:66px;padding:10px 8px;text-align:left;background:#2b3932;color:#f1eee4;border:1px solid #65785a;border-radius:9px;scroll-snap-align:start}.builder-shop button.selected{background:#526f50;border-color:#c5d99b;box-shadow:0 0 0 2px #c5d99b55}.builder-shop button.selected small{color:#eef4d9}.builder-shop strong{display:block;font-size:11px}.builder-shop small{display:block;font-size:10px;color:#c5dca1;margin-top:5px}

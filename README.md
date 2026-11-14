@@ -1,12 +1,32 @@
+## Parcours par styles — découverte pour débutants
+
+Chaque bar possède un thème exclusif et quatre QCM à trois propositions. Les 48 questions s’adressent aux débutants : couleur, origine, ingrédient et arômes familiers. La progression reste douce : premiers repères, nouvelles découvertes, puis quelques notions simples expliquées comme le corps ou la torréfaction. Aucun diagnostic de dégustateur n’est demandé. Trois réponses justes restent nécessaires ; les récompenses, niveaux et réussites déjà enregistrées sont conservés.
+
+| Quartier | Thèmes dans l’ordre des bars |
+|---|---|
+| Brasseurs | Pils allemande ; blanche belge (witbier) ; American IPA ; American Amber Ale |
+| Lanternes | Saison ; tripel belge ; lambic traditionnel ; Rauchbier |
+| Brumes | British Brown Ale ; doppelbock ; barleywine anglais ; Irish Stout |
+
+« Brune » et « blanche » sont précisés par un style pour éviter les généralisations. Les douze chapitres préparent les questions correspondantes. Chaque réponse reçoit une explication dédiée. `curriculum.txt` conserve la rédaction éditoriale ; les fichiers exécutés sont `content.js`, `content-night.js` et `content-gothic.js` et doivent rester synchronisés avec cette rédaction.
+
+## Quartier des Brumes
+
+Après les huit premiers bars, **Quartiers** donne accès au quartier gothique. Sa bibliothèque propose quatre nouveaux chapitres et seize questions. Les quatre établissements sont Le Corbeau d’Argent, La Crypte des Fermenteurs, Le Griffon Pourpre et L’Orangerie des Brumes.
+
+Le décor conserve les formes simples et les couleurs mates du jeu. Quatre nouveaux intérieurs et quatre portraits gothiques (six poses chacun) accompagnent les examens. Des petits feux, halos lumineux et reflets animent les entrées ; les cheminées restent animées. Les effets respectent la préférence système de réduction des animations.
+
+Les ressources sont `assets/gothic-map.png`, `assets/gothic-interiors.png` et les quatre atlas `assets/gothic-*.png`. Les leçons sont dans `content-gothic.js` avec leurs liens vers les ressources du BJCP. La progression existante est conservée.
+
 # La rue du Houblon — prototype 0.6
 
 ## Deuxième quartier et niveaux
 
 Après avoir réussi les quatre premiers bars, ouvrez **Quartiers** en haut du jeu pour rejoindre la **Place des Lanternes**, ou utilisez le passage au sud du village. Cette carte nocturne possède une place avec fontaine, un circuit périphérique, quatre nouveaux bars et un kiosque de lecture. Le retour au premier quartier reste libre.
 
-Les nouveaux thèmes sont les arômes du houblon, les bulles et la refermentation, la conservation, puis le verre et le service : quatre leçons et seize questions supplémentaires. Les sources figurent dans les leçons et dans `assets/place-lanternes.md`. Les intérieurs de la place reprennent les pièces existantes avec un éclairage teinté et de nouveaux personnages.
+Les thèmes de la deuxième ville sont désormais la saison, la tripel, le lambic et la Rauchbier : quatre leçons et seize questions. Les sources figurent dans les leçons et dans `assets/place-lanternes.md`. Les intérieurs de la place reprennent les pièces existantes avec un éclairage teinté et de nouveaux personnages.
 
-Le badge près du portrait commence au **niveau 1**. Chaque bar réussi pour la première fois donne **exactement +1 niveau**, jusqu’au niveau 9 après les huit bars. Les XP restent une récompense distincte pour la future boutique. Rejouer un bar réussi ne redonne ni XP ni niveau. Les anciennes sauvegardes sont conservées et leur niveau est recalculé à partir des bars déjà réussis ; le quartier actuel est également enregistré.
+Le badge près du portrait commence au **niveau 1**. Chaque bar réussi pour la première fois donne **exactement +1 niveau**, jusqu’au niveau 13 après les douze bars. Les XP restent une récompense distincte pour la future boutique. Rejouer un bar réussi ne redonne ni XP ni niveau. Les anciennes sauvegardes sont conservées et leur niveau est recalculé à partir des bars déjà réussis ; le quartier actuel est également enregistré.
 
 ## Commandes tactiles
 
@@ -61,13 +81,13 @@ La progression est enregistrée dans le stockage local du navigateur. Utiliser l
 
 ## Contenu pédagogique
 
-Le dossier était vide lors de la création du prototype. Les quatre fiches et les seize questions sont donc un contenu de démonstration, et non les documents précédemment préparés avec Mr Cerisier. Ils sont regroupés dans **content.js** pour faciliter leur remplacement par le cours réel. Les dix bières sont des créations fictives pour le jeu.
+Le parcours actuel contient douze fiches et quarante-huit questions originales sur les styles de bière, avec des références BJCP dans chaque chapitre. Il ne reprend pas un cours externe de Mr Cerisier. Les dix bières sont des créations fictives pour le jeu.
 
 ## Structure et évolution
 
 ### Atelier « Mon bar »
 
-Le troisième bouton de la navigation ouvre une pièce vide de 15 × 12 cases (une case = un mètre). Choisir un équipement dans le catalogue puis toucher le plan pour l’acheter et le placer. Toucher un élément posé permet de le déplacer, le pivoter puis confirmer sa position, ou le revendre au prix d’achat. Le plan et les achats sont enregistrés avec la progression. Au clavier, les flèches déplacent le curseur du plan et Entrée permet de placer/sélectionner.
+Le troisième bouton de la navigation ouvre une pièce vide de 15 × 12 cases (une case = un mètre). Le catalogue d’équipement est un carrousel horizontal placé au-dessus du plan. Les cases du plan sont agrandies, et celui-ci se fait défiler horizontalement en le faisant glisser sur téléphone tant qu’aucun élément n’est sélectionné. Choisir un équipement puis toucher le plan pour l’acheter et le placer. Toucher un élément posé permet de le déplacer, le pivoter puis confirmer sa position, ou le revendre au prix d’achat. Le plan et les achats sont enregistrés avec la progression. Au clavier, les flèches déplacent le curseur du plan et Entrée permet de placer/sélectionner.
 
 Le budget est constitué des XP gagnés dans les examens moins le coût des équipements possédés. Le niveau et le total historique d’XP restent inchangés. Le premier aménagement complet coûte 540 XP : comptoir, tireuse, fût, entrée, toilettes, table de deux places, tonneau de deux places et Alex, le premier barman. Les tables existent en deux, quatre ou six places ; les tonneaux avec tabourets en deux ou quatre places.
 
